@@ -1,0 +1,40 @@
+{
+    "name": "rainsens/permit",
+    "description": "Laravel RBAC permission",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Rainsen",
+            "email": "yusen@rainsen.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.1",
+        "ext-json": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Rainsens\\Permit\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Rainsens\\Permit\\Tests": "tests"
+        }
+    },
+    "require-dev": {
+        "orchestra/testbench": "^4.0",
+        "phpunit/phpunit": "^9.4"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Rainsens\\Permit\\Providers\\PermitServiceProvider"
+            ],
+            "aliases": {
+                "Permit": "Rainsens\\Permit\\Facades\\Permit"
+            }
+        }
+    }
+}
