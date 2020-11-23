@@ -7,17 +7,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 interface PermitContract
 {
     /**
-     * All roles associated with current permission.
+     * All roles associated with certain permit.
      */
     public function roles(): BelongsToMany;
 	
 	/**
-	 * Find a permission by its id.
+	 * Find a permit by its id.
 	 */
 	public static function findById(int $id, $guardName): self;
     
     /**
-     * Find a permission by its name.
+     * Find a permit by its name.
      */
     public static function findByName(string $name, $guardName): self;
 

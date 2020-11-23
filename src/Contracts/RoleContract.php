@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 interface RoleContract
 {
     /**
-     * All permissions associated with current role.
+     * All permits associated with certain role.
      */
-    public function permissions(): BelongsToMany;
+    public function permits(): BelongsToMany;
 
     /**
      * Find a role by its name and guard name.
@@ -22,7 +22,7 @@ interface RoleContract
     public static function findById(int $id, $guardName): self;
 
     /**
-     * Determine if the user had given permission.
+     * Determine if the user had given permit.
      */
     public function hasPermit($permit): bool;
 }

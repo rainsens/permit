@@ -2,6 +2,12 @@
 
 namespace Rainsens\Permit\Exceptions;
 
-class RoleAlreadyExists extends PermitException
+use InvalidArgumentException;
+
+class RoleAlreadyExists extends InvalidArgumentException
 {
+    public static function create(string $roleName, string $guardName)
+    {
+        return new static("A role `{$roleName}` already exists for guard `{$guardName}`.");
+    }
 }
