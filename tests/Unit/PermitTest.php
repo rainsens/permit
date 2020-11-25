@@ -191,4 +191,23 @@ class PermitTest extends TestCase
 		
 		$this->assertTrue($permit->refresh()->underUser($user));
 	}
+	
+	/** @test */
+	public function user_has_permits()
+	{
+		$permit1 = createPermit(['id' => 1, 'name' => 'a']);
+		$permit2 = createPermit(['id' => 2, 'name' => 'b']);
+		
+		$user = createUser();
+		
+		$this->assertCount(0, $user->permits);
+		
+		$permit1->giveToUsers($user);
+		
+		$this->assertCount(1, $user->refresh()->permits);
+		
+		$permit2->giveToUsers($user);
+		
+		$this->assertCount(2, $user->refresh()->permits);
+	}
 }

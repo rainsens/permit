@@ -13,6 +13,7 @@ use Rainsens\Rbac\Facades\Rbac;
  * Class Role
  * @package Rainsens\Rbac\Models
  * @property Collection $permits
+ * @property Collection $users
  */
 class Role extends Model implements RoleContract
 {
@@ -93,9 +94,31 @@ class Role extends Model implements RoleContract
 		return $this;
 	}
 	
+	public function giveToUsers(...$users)
+	{
+		$userModels = Rbac::authorize()->getUserModels($users);
+		$this->users()->sync($userModels->pluck('id'));
+		$this->load('users');
+		return $this;
+	}
+	
+	public function removeFromUsers(...$users)
+	{
+		$userModels = Rbac::authorize()->getUserModels($users);
+		$this->users()->detach($userModels->pluck('id'));
+		$this->load('users');
+		return $this;
+	}
+	
 	public function hasPermit($permit)
 	{
 		$permitModel = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->permitInstance, $permit)->first();
 		return $this->permits->containsStrict('id', $permitModel->id);
+	}
+	
+	public function underUser($user)
+	{
+		$userModel = Rbac::authorize()->getUserModels($user)->first();
+		return $this->users->containsStrict('id', $userModel->id);
 	}
 }

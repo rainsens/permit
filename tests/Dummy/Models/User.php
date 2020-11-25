@@ -4,7 +4,7 @@ namespace Rainsens\Rbac\Tests\Dummy\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Rainsens\Rbac\Traits\HasPermits;
+use Rainsens\Rbac\Traits\RbacTrait;
 
 /**
  * App\Models\User
@@ -36,7 +36,7 @@ use Rainsens\Rbac\Traits\HasPermits;
 class User extends Authenticatable
 {
     use Notifiable;
-    use HasPermits;
+    use RbacTrait;
 
     /**
      * The attributes that are mass assignable.

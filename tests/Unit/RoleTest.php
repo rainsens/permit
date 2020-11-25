@@ -5,6 +5,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Rainsens\Rbac\Models\Permit;
 use Rainsens\Rbac\Models\Role;
 use Rainsens\Rbac\Tests\TestCase;
+use Rainsens\Rbac\Tests\Dummy\Models\User;
 
 class RoleTest extends TestCase
 {
@@ -30,6 +31,30 @@ class RoleTest extends TestCase
 		
 		$this->assertCount(1, Role::all());
 		$this->assertEquals('web', $role->guard);
+	}
+	
+	/** @test */
+	public function find_a_role_by_name()
+	{
+		factory(Role::class)->create([
+			'id' => 1,
+			'name' => 'Author',
+		]);
+		
+		$role = Role::findByName('Author');
+		$this->assertEquals('Author', $role->name);
+	}
+	
+	/** @test */
+	public function find_a_role_by_id()
+	{
+		factory(Role::class)->create([
+			'id' => 2,
+			'name' => 'Editor',
+		]);
+		
+		$role = Role::findById(2);
+		$this->assertEquals('Editor', $role->name);
 	}
 	
 	/** @test */
@@ -112,5 +137,54 @@ class RoleTest extends TestCase
 		$this->assertTrue($role->refresh()->hasPermit($p1));
 		
 		$this->assertFalse($role->refresh()->hasPermit($p2));
+	}
+	
+	/** @test */
+	public function can_give_role_to_users()
+	{
+		$role = factory(Role::class)->create([
+			'id' => 1,
+			'name' => 'Author',
+		]);
+		
+		$user1 = factory(User::class)->create([
+			'id' => 1
+		]);
+		
+		$user2 = factory(User::class)->create([
+			'id' => 2
+		]);
+		
+		$this->assertCount(0, $role->users);
+		
+		$role->giveToUsers($user1, $user2);
+		
+		$this->assertCount(2, $role->refresh()->users);
+	}
+	
+	/** @test */
+	public function can_remove_role_from_users()
+	{
+		$role = factory(Role::class)->create([
+			'id' => 1,
+			'name' => 'Author',
+		]);
+		
+		$user1 = factory(User::class)->create([
+			'id' => 1
+		]);
+		
+		$user2 = factory(User::class)->create([
+			'id' => 2
+		]);
+		
+		$this->assertCount(0, $role->users);
+		
+		$role->giveToUsers($user1, $user2);
+		$this->assertCount(2, $role->refresh()->users);
+		
+		$role->removeFromUsers($user1);
+		$this->assertCount(1, $role->refresh()->users);
+		$this->assertEquals(2, $role->refresh()->users->first()->id);
 	}
 }

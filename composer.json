@@ -24,7 +24,10 @@
     "autoload-dev": {
         "psr-4": {
             "Rainsens\\Rbac\\Tests\\": "tests"
-        }
+        },
+        "files": [
+            "tests/helpers.php"
+        ]
     },
     "require-dev": {
         "orchestra/testbench": "^4.0",

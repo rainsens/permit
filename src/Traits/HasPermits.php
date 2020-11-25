@@ -16,4 +16,9 @@ trait HasPermits
 			'permit_id'
 		);
 	}
+	
+	public function givePermits(...$permits)
+	{
+	
+	}
 }
