@@ -17,10 +17,10 @@ trait RbacTrait
 	{
 		return $this->morphToMany(
 			Rbac::authorize()->permitClass,
-			'permitable',
+			Rbac::authorize()->permitMorphName,
 			Rbac::authorize()->permitUsersTable,
-			'permitable_id',
-			'permit_id'
+			Rbac::authorize()->permitMorphKey,
+			Rbac::authorize()->permitMorphId
 		);
 	}
 	
@@ -28,10 +28,10 @@ trait RbacTrait
 	{
 		return $this->morphToMany(
 			Rbac::authorize()->roleClass,
-			'rolable',
+			Rbac::authorize()->roleMorphName,
 			Rbac::authorize()->roleUsersTable,
-			'rolable_id',
-			'role_id'
+			Rbac::authorize()->roleMorphKey,
+			Rbac::authorize()->roleMorphId
 		);
 	}
 	
