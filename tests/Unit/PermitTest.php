@@ -252,7 +252,7 @@ class PermitTest extends TestCase
 	}
 	
 	/** @test */
-	public function can_check_if_a_user_had_a_certain_permit()
+	public function can_check_if_a_user_had_permits()
 	{
 		$user = createUser();
 		
@@ -262,10 +262,10 @@ class PermitTest extends TestCase
 			'path' => '/create-article'
 		]);
 		
-		$this->assertFalse($user->hasPermit($permit));
+		$this->assertFalse($user->hasPermits($permit));
 		
 		$user->givePermits($permit);
 		
-		$this->assertTrue($user->refresh()->hasPermit($permit));
+		$this->assertTrue($user->refresh()->hasPermits($permit));
 	}
 }

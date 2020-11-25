@@ -112,7 +112,7 @@ class RoleTest extends TestCase
 	}
 	
 	/** @test */
-	public function can_check_if_a_role_had_a_permit()
+	public function can_check_if_a_role_had_permits()
 	{
 		$role = factory(Role::class)->create([
 			'id' => 1
@@ -130,13 +130,13 @@ class RoleTest extends TestCase
 			'path' => '/edit-article'
 		]);
 		
-		$this->assertFalse($role->hasPermit($p1));
+		$this->assertFalse($role->hasPermits($p1));
 		
 		$role->givePermits($p1);
 		
-		$this->assertTrue($role->refresh()->hasPermit($p1));
+		$this->assertTrue($role->refresh()->hasPermits($p1));
 		
-		$this->assertFalse($role->refresh()->hasPermit($p2));
+		$this->assertFalse($role->refresh()->hasPermits($p2));
 	}
 	
 	/** @test */
@@ -189,7 +189,7 @@ class RoleTest extends TestCase
 	}
 	
 	/** @test */
-	public function can_check_if_a_role_under_a_user()
+	public function can_check_if_a_role_under_users()
 	{
 		$user = createUser();
 		
@@ -197,11 +197,11 @@ class RoleTest extends TestCase
 			'id' => 1
 		]);
 		
-		$this->assertFalse($role->underUser($user));
+		$this->assertFalse($role->underUsers($user));
 		
 		$role->giveToUsers($user);
 		
-		$this->assertTrue($role->refresh()->underUser($role));
+		$this->assertTrue($role->refresh()->underUsers($role));
 	}
 	
 	/** @test */
@@ -262,7 +262,7 @@ class RoleTest extends TestCase
 	}
 	
 	/** @test */
-	public function can_check_if_a_user_had_a_certain_role()
+	public function can_check_if_a_user_had_roles()
 	{
 		$user = createUser();
 		
@@ -271,10 +271,10 @@ class RoleTest extends TestCase
 			'name' => 'Editor',
 		]);
 		
-		$this->assertFalse($user->hasRole($role));
+		$this->assertFalse($user->hasRoles($role));
 		
 		$user->giveRoles($role);
 		
-		$this->assertTrue($user->refresh()->hasRole($role));
+		$this->assertTrue($user->refresh()->hasRoles($role));
 	}
 }

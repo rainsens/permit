@@ -67,15 +67,25 @@ trait RbacTrait
 		return $this;
 	}
 	
-	public function hasPermit($permit)
+	public function hasPermits($permits)
 	{
-		$permitModel = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->permitInstance, $permit)->first();
-		return $this->permits->containsStrict('id', $permitModel->id);
+		$permitModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->permitInstance, $permits);
+		foreach ($permitModels as $model) {
+			if (! $this->permits->containsStrict('id', $model->id)) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
-	public function hasRole($role)
+	public function hasRoles($roles)
 	{
-		$roleModel = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->roleInstance, $role)->first();
-		return $this->roles->containsStrict('id', $roleModel->id);
+		$roleModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->roleInstance, $roles);
+		foreach ($roleModels as $model) {
+			if (! $this->roles->containsStrict('id', $model->id)) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

@@ -111,15 +111,25 @@ class Role extends Model implements RoleContract
 		return $this;
 	}
 	
-	public function hasPermit($permit)
+	public function hasPermits($permits)
 	{
-		$permitModel = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->permitInstance, $permit)->first();
-		return $this->permits->containsStrict('id', $permitModel->id);
+		$permitModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->permitInstance, $permits);
+		foreach ($permitModels as $model) {
+			if (! $this->permits->containsStrict('id', $model->id)) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
-	public function underUser($user)
+	public function underUsers($users)
 	{
-		$userModel = Rbac::authorize()->getUserModels($user)->first();
-		return $this->users->containsStrict('id', $userModel->id);
+		$userModels = Rbac::authorize()->getUserModels($users);
+		foreach ($userModels as $model) {
+			if (! $this->users->containsStrict('id', $model->id)) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
