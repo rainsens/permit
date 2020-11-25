@@ -1,25 +1,15 @@
 <?php
-
-namespace Rainsens\Permit\Contracts;
-
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+namespace Rainsens\Authorize\Contracts;
 
 interface PermitContract
 {
-    /**
-     * All roles associated with certain permit.
-     */
-    public function roles(): BelongsToMany;
+	public static function create(string $permitName);
 	
-	/**
-	 * Find a permit by its id.
-	 */
-	public static function findById(int $id, $guardName): self;
-    
-    /**
-     * Find a permit by its name.
-     */
-    public static function findByName(string $name, $guardName): self;
-
-    
+	public static function findByName(string $name);
+	
+	public static function findById(int $id);
+	
+	public function roleItems();
+	
+	public function users();
 }

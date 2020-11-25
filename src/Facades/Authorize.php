@@ -1,12 +1,12 @@
 <?php
-namespace Rainsens\Permit\Facades;
+namespace Rainsens\Authorize\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
-class Permit extends Facade
+class Authorize extends Facade
 {
 	protected static function getFacadeAccessor()
 	{
-		return 'permit';
+		return 'authorize';
 	}
 }

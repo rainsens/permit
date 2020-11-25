@@ -1,13 +1,8 @@
 <?php
 
-namespace Rainsens\Permit\Exceptions;
+namespace Rainsens\Authorize\Exceptions;
 
-use InvalidArgumentException;
-
-class RoleAlreadyExists extends InvalidArgumentException
+class RoleAlreadyExists extends AuthorizeException
 {
-    public static function create(string $roleName, string $guardName)
-    {
-        return new static("A role `{$roleName}` already exists for guard `{$guardName}`.");
-    }
+
 }

@@ -1,5 +1,5 @@
 <?php
-namespace Rainsens\Permit\Console;
+namespace Rainsens\Authorize\Console;
 
 use Illuminate\Console\Command;
 

@@ -1,18 +1,8 @@
 <?php
 
-namespace Rainsens\Permit\Exceptions;
+namespace Rainsens\Authorize\Exceptions;
 
-use InvalidArgumentException;
-
-class PermitDoesNotExist extends InvalidArgumentException
+class PermitDoesNotExist extends AuthorizeException
 {
-    public static function create(string $permitName, string $guardName = '')
-    {
-        return new static("There is no permit named `{$permitName}` for guard `{$guardName}`.");
-    }
 
-    public static function withId(int $permitId, string $guardName = '')
-    {
-        return new static("There is no [permit] with id `{$permitId}` for guard `{$guardName}`.");
-    }
 }

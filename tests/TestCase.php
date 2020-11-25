@@ -1,24 +1,35 @@
 <?php
-namespace Rainsens\Permit\Tests;
+namespace Rainsens\Authorize\Tests;
 
-use Rainsens\Permit\Providers\PermitServiceProvider;
+use Rainsens\Authorize\Facades\Authorize;
+use Rainsens\Authorize\Providers\AuthorizeServiceProvider;
 
 class TestCase extends \Orchestra\Testbench\TestCase
 {
 	public function setUp(): void
 	{
 		parent::setUp();
+		
+		$this->withFactories(_base_path('database/factories'));
 	}
 	
 	protected function getPackageProviders($app)
 	{
 		return [
-			PermitServiceProvider::class,
+			AuthorizeServiceProvider::class,
+		];
+	}
+	
+	protected function getPackageAliases($app)
+	{
+		return [
+			'Authorize' => Authorize::class
 		];
 	}
 	
 	protected function getEnvironmentSetUp($app)
 	{
-	
+		$permitsConfig = require _base_path('config/authorize.php');
+		config(['authorize' => $permitsConfig]);
 	}
 }
