@@ -10,7 +10,7 @@ class Role
 	public function handle($request, Closure $next, $guard = null)
 	{
 		if (Auth::guard($guard)->guest()) {
-			throw new UnauthorizedException('');
+			throw new UnauthorizedException('Has not logged in.');
 		}
 		
 		$role = '/';

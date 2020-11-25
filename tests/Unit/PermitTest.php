@@ -110,7 +110,7 @@ class PermitTest extends TestCase
 	}
 	
 	/** @test */
-	public function can_check_if_a_permit_under_a_role()
+	public function can_check_if_a_permit_under_roles()
 	{
 		$role = factory(Role::class)->create([
 			'id' => 1
@@ -122,11 +122,11 @@ class PermitTest extends TestCase
 			'path' => '/create-article'
 		]);
 		
-		$this->assertFalse($permit->underRole($role));
+		$this->assertFalse($permit->underRoles($role));
 		
 		$permit->giveToRoles($role);
 		
-		$this->assertTrue($permit->refresh()->underRole($role));
+		$this->assertTrue($permit->refresh()->underRoles($role));
 	}
 	
 	/** @test */
@@ -173,7 +173,7 @@ class PermitTest extends TestCase
 	}
 	
 	/** @test */
-	public function can_check_if_a_permit_under_a_user()
+	public function can_check_if_a_permit_under_users()
 	{
 		$user = factory(User::class)->create([
 			'id' => 1
@@ -185,11 +185,11 @@ class PermitTest extends TestCase
 			'path' => '/create-article'
 		]);
 		
-		$this->assertFalse($permit->underUser($user));
+		$this->assertFalse($permit->underUsers($user));
 		
 		$permit->giveToUsers($user);
 		
-		$this->assertTrue($permit->refresh()->underUser($user));
+		$this->assertTrue($permit->refresh()->underUsers($user));
 	}
 	
 	/** @test */

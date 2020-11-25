@@ -118,15 +118,25 @@ class Permit extends Model implements PermitContract
 		return $this;
 	}
 	
-	public function underRole($role)
+	public function underRoles($roles)
 	{
-		$roleModel = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->roleInstance, $role)->first();
-		return $this->roles->containsStrict('id', $roleModel->id);
+		$roleModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->roleInstance, $roles);
+		foreach ($roleModels as $model) {
+			if (! $this->roles->containsStrict('id', $model->id)) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
-	public function underUser($user)
+	public function underUsers($users)
 	{
-		$userModel = Rbac::authorize()->getUserModels($user)->first();
-		return $this->users->containsStrict('id', $userModel->id);
+		$userModels = Rbac::authorize()->getUserModels($users);
+		foreach ($userModels as $model) {
+			if (! $this->users->containsStrict('id', $model->id)) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
