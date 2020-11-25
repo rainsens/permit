@@ -187,4 +187,94 @@ class RoleTest extends TestCase
 		$this->assertCount(1, $role->refresh()->users);
 		$this->assertEquals(2, $role->refresh()->users->first()->id);
 	}
+	
+	/** @test */
+	public function can_check_if_a_role_under_a_user()
+	{
+		$user = createUser();
+		
+		$role = factory(Role::class)->create([
+			'id' => 1
+		]);
+		
+		$this->assertFalse($role->underUser($user));
+		
+		$role->giveToUsers($user);
+		
+		$this->assertTrue($role->refresh()->underUser($role));
+	}
+	
+	/** @test */
+	public function user_has_roles()
+	{
+		$role1 = createRole(['id' => 1, 'name' => 'a']);
+		$role2 = createRole(['id' => 2, 'name' => 'b']);
+		
+		$user = createUser();
+		
+		$this->assertCount(0, $user->roles);
+		
+		$role1->giveToUsers($user);
+		
+		$this->assertCount(1, $user->refresh()->roles);
+		
+		$role2->giveToUsers($user);
+		
+		$this->assertCount(2, $user->refresh()->roles);
+	}
+	
+	/** @test */
+	public function user_can_get_roles()
+	{
+		$role = createRole([
+			'id' => 1,
+			'name' => 'Author',
+		]);
+		
+		$user = createUser();
+		
+		$this->assertCount(0, $user->roles);
+		
+		$user->giveRoles($role);
+		
+		$this->assertCount(1, $user->refresh()->roles);
+	}
+	
+	/** @test */
+	public function user_can_remove_roles()
+	{
+		$role = createRole([
+			'id' => 1,
+			'name' => 'Editor',
+		]);
+		
+		$user = createUser();
+		
+		$this->assertCount(0, $user->roles);
+		
+		$user->giveRoles($role);
+		
+		$this->assertCount(1, $user->refresh()->roles);
+		
+		$user->removeRoles($role);
+		
+		$this->assertCount(0, $user->refresh()->roles);
+	}
+	
+	/** @test */
+	public function can_check_if_a_user_had_a_certain_role()
+	{
+		$user = createUser();
+		
+		$role = createRole([
+			'id' => 1,
+			'name' => 'Editor',
+		]);
+		
+		$this->assertFalse($user->hasRole($role));
+		
+		$user->giveRoles($role);
+		
+		$this->assertTrue($user->refresh()->hasRole($role));
+	}
 }

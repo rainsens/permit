@@ -210,4 +210,62 @@ class PermitTest extends TestCase
 		
 		$this->assertCount(2, $user->refresh()->permits);
 	}
+	
+	/** @test */
+	public function user_can_get_permits()
+	{
+		$permit = createPermit([
+			'id' => 1,
+			'name' => 'Create Article',
+			'path' => '/create-article'
+		]);
+		
+		$user = createUser();
+		
+		$this->assertCount(0, $user->permits);
+		
+		$user->givePermits($permit);
+		
+		$this->assertCount(1, $user->refresh()->permits);
+	}
+	
+	/** @test */
+	public function user_can_remove_permits()
+	{
+		$permit = createPermit([
+			'id' => 1,
+			'name' => 'Create Article',
+			'path' => '/create-article'
+		]);
+		
+		$user = createUser();
+		
+		$this->assertCount(0, $user->permits);
+		
+		$user->givePermits($permit);
+		
+		$this->assertCount(1, $user->refresh()->permits);
+		
+		$user->removePermits($permit);
+		
+		$this->assertCount(0, $user->refresh()->permits);
+	}
+	
+	/** @test */
+	public function can_check_if_a_user_had_a_certain_permit()
+	{
+		$user = createUser();
+		
+		$permit = createPermit([
+			'id' => 1,
+			'name' => 'Create Article',
+			'path' => '/create-article'
+		]);
+		
+		$this->assertFalse($user->hasPermit($permit));
+		
+		$user->givePermits($permit);
+		
+		$this->assertTrue($user->refresh()->hasPermit($permit));
+	}
 }

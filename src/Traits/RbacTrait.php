@@ -9,6 +9,7 @@ use Rainsens\Rbac\Facades\Rbac;
  * Trait RbacTrait
  * @package Rainsens\Rbac\Traits
  * @property Collection $permits
+ * @property Collection $roles
  */
 trait RbacTrait
 {
@@ -20,6 +21,17 @@ trait RbacTrait
 			Rbac::authorize()->permitUsersTable,
 			'permitable_id',
 			'permit_id'
+		);
+	}
+	
+	public function roles(): BelongsToMany
+	{
+		return $this->morphToMany(
+			Rbac::authorize()->roleClass,
+			'rolable',
+			Rbac::authorize()->roleUsersTable,
+			'rolable_id',
+			'role_id'
 		);
 	}
 	
@@ -42,7 +54,7 @@ trait RbacTrait
 	public function giveRoles(...$roles)
 	{
 		$roleModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->roleInstance, $roles);
-		$this->permits()->sync($roleModels->pluck('id'));
+		$this->roles()->sync($roleModels->pluck('id'));
 		$this->load('permits');
 		return $this;
 	}
@@ -50,7 +62,7 @@ trait RbacTrait
 	public function removeRoles(...$roles)
 	{
 		$roleModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->roleInstance, $roles);
-		$this->permits()->detach($roleModels->pluck('id'));
+		$this->roles()->detach($roleModels->pluck('id'));
 		$this->load('permits');
 		return $this;
 	}
@@ -64,6 +76,6 @@ trait RbacTrait
 	public function hasRole($role)
 	{
 		$roleModel = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->roleInstance, $role)->first();
-		return $this->permits->containsStrict('id', $roleModel->id);
+		return $this->roles->containsStrict('id', $roleModel->id);
 	}
 }
