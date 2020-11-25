@@ -1,8 +1,8 @@
 <?php
 
-namespace Rainsens\Authorize\Exceptions;
+namespace Rainsens\Rbac\Exceptions;
 
-class PermitDoesNotExist extends AuthorizeException
+class PermitDoesNotExist extends RbacException
 {
 
 }

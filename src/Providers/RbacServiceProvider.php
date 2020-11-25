@@ -1,16 +1,17 @@
 <?php
-namespace Rainsens\Authorize\Providers;
+namespace Rainsens\Rbac\Providers;
 
+use Rainsens\Rbac\Rbac;
 use Illuminate\Support\ServiceProvider;
-use Rainsens\Authorize\Console\ShowCommand;
-use Rainsens\Authorize\Authorize;
+use Rainsens\Rbac\Console\ShowCommand;
+use Rainsens\Rbac\Support\Authorize;
 
-class AuthorizeServiceProvider extends ServiceProvider
+class RbacServiceProvider extends ServiceProvider
 {
 	public function register()
 	{
-		$this->app->bind('authorize', function ($app) {
-			return new Authorize();
+		$this->app->bind('rbac', function ($app) {
+			return new Rbac();
 		});
 	}
 	
@@ -21,7 +22,7 @@ class AuthorizeServiceProvider extends ServiceProvider
 				ShowCommand::class,
 			]);
 			
-			$this->publishes([_base_path('config/permit.php') => config_path('permit.php')]);
+			$this->publishes([_base_path('config/rbac.php') => config_path('rbac.php')]);
 		}
 		
 		$this->permitMigrations();

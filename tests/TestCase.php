@@ -1,35 +1,36 @@
 <?php
-namespace Rainsens\Authorize\Tests;
+namespace Rainsens\Rbac\Tests;
 
-use Rainsens\Authorize\Facades\Authorize;
-use Rainsens\Authorize\Providers\AuthorizeServiceProvider;
+use Rainsens\Rbac\Facades\Rbac;
+use Rainsens\Rbac\Providers\RbacServiceProvider;
+use Rainsens\Rbac\Tests\Dummy\Models\User;
 
 class TestCase extends \Orchestra\Testbench\TestCase
 {
 	public function setUp(): void
 	{
 		parent::setUp();
-		
 		$this->withFactories(_base_path('database/factories'));
 	}
 	
 	protected function getPackageProviders($app)
 	{
 		return [
-			AuthorizeServiceProvider::class,
+			RbacServiceProvider::class,
 		];
 	}
 	
 	protected function getPackageAliases($app)
 	{
 		return [
-			'Authorize' => Authorize::class
+			'Rbac' => Rbac::class
 		];
 	}
 	
 	protected function getEnvironmentSetUp($app)
 	{
-		$permitsConfig = require _base_path('config/authorize.php');
-		config(['authorize' => $permitsConfig]);
+		$rbacConfig = require _base_path('config/rbac.php');
+		config(['rbac' => $rbacConfig]);
+		config(['auth.providers.users.model' => User::class]);
 	}
 }

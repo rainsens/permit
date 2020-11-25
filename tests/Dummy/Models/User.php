@@ -1,6 +1,6 @@
 <?php
 
-namespace Rainsens\Authorize\Tests\Dummy\Models;
+namespace Rainsens\Rbac\Tests\Dummy\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;

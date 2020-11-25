@@ -2,9 +2,9 @@
 namespace Rainsens\Permit\Tests\Unit;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Rainsens\Authorize\Models\Permit;
-use Rainsens\Authorize\Models\Role;
-use Rainsens\Authorize\Tests\TestCase;
+use Rainsens\Rbac\Models\Permit;
+use Rainsens\Rbac\Models\Role;
+use Rainsens\Rbac\Tests\TestCase;
 
 class RoleTest extends TestCase
 {

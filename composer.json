@@ -1,6 +1,6 @@
 {
-    "name": "rainsens/authorize",
-    "description": "A Laravel RBAC authorization system based on http path",
+    "name": "rainsens/rbac",
+    "description": "A Laravel RBAC authorization package based upon http path",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -15,7 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Rainsens\\Authorize\\": "src"
+            "Rainsens\\Rbac\\": "src"
         },
         "files": [
             "bootstrap/helpers.php"
@@ -23,7 +23,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Rainsens\\Authorize\\Tests\\": "tests"
+            "Rainsens\\Rbac\\Tests\\": "tests"
         }
     },
     "require-dev": {
@@ -33,10 +33,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Rainsens\\Authorize\\Providers\\AuthorizeServiceProvider"
+                "Rainsens\\Rbac\\Providers\\RbacServiceProvider"
             ],
             "aliases": {
-                "Permits": "Rainsens\\Authorize\\Facades\\Authorize"
+                "Rbac": "Rainsens\\Rbac\\Facades\\Rbac"
             }
         }
     }

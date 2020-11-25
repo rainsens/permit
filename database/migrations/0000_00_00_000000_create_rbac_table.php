@@ -4,14 +4,14 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreatePermitsTable extends Migration
+class CreateRbacTable extends Migration
 {
     public function up()
     {
-        $tableNames = config('authorize.table_names');
+        $tableNames = config('rbac.table_names');
 	    
         if (empty($tableNames)) {
-            throw new Exception('Error: config/authorize.php not found.');
+            throw new Exception('Error: config/rbac.php not found.');
         }
 	
 	    Schema::create($tableNames['permits'], function (Blueprint $table) {
@@ -58,10 +58,10 @@ class CreatePermitsTable extends Migration
     
     public function down()
     {
-        $tableNames = config('authorize.table_names');
+        $tableNames = config('rbac.table_names');
 
         if (empty($tableNames)) {
-            throw new Exception('Error: config/authorize.php not found.');
+            throw new Exception('Error: config/rbac.php not found.');
         }
 
         Schema::drop($tableNames['role_users']);

@@ -1,7 +1,7 @@
 <?php
-namespace Rainsens\Authorize\Exceptions;
+namespace Rainsens\Rbac\Exceptions;
 
-class InvalidArgumentException extends AuthorizeException
+class InvalidArgumentException extends RbacException
 {
 
 }

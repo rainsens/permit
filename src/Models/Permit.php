@@ -1,13 +1,19 @@
 <?php
-namespace Rainsens\Authorize\Models;
+namespace Rainsens\Rbac\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Rainsens\Authorize\Contracts\PermitContract;
-use Rainsens\Authorize\Exceptions\PermitAlreadyExists;
-use Rainsens\Authorize\Exceptions\PermitDoesNotExist;
-use Rainsens\Authorize\Facades\Authorize;
+use Illuminate\Support\Collection;
+use Rainsens\Rbac\Contracts\PermitContract;
+use Rainsens\Rbac\Exceptions\PermitAlreadyExists;
+use Rainsens\Rbac\Exceptions\PermitDoesNotExist;
+use Rainsens\Rbac\Facades\Rbac;
 
+/**
+ * Class Permit
+ * @package Rainsens\Rbac\Models
+ * @property Collection $roleItems
+ */
 class Permit extends Model implements PermitContract
 {
 	protected $guarded = ['id'];
@@ -28,7 +34,7 @@ class Permit extends Model implements PermitContract
 	public static function create(string $permitName)
 	{
 		$attributes['name'] = $permitName;
-		$attributes['guard'] = Authorize::guardName();
+		$attributes['guard'] = Rbac::guard()->name;;
 		
 		if (static::where($attributes)->first()) {
 			throw new PermitAlreadyExists("Permit provided already exists.");
@@ -38,7 +44,7 @@ class Permit extends Model implements PermitContract
 	
 	public static function findByName(string $name)
 	{
-		$permit = static::where(['name' => $name, 'guard' => Authorize::guardName()])->first();
+		$permit = static::where(['name' => $name, 'guard' => Rbac::guard()->name])->first();
 		
 		if (! $permit) {
 			throw new PermitDoesNotExist('Permit name provided does not exist.');
@@ -49,7 +55,7 @@ class Permit extends Model implements PermitContract
 	
 	public static function findById(int $id)
 	{
-		$permit = static::where(['id' => $id, 'guard' => Authorize::guardName()])->first();
+		$permit = static::where(['id' => $id, 'guard' => Rbac::guard()->name])->first();
 		
 		if (! $permit) {
 			throw new PermitDoesNotExist('Permit id provided does not exist.');
@@ -61,20 +67,22 @@ class Permit extends Model implements PermitContract
 	public function roleItems()
 	{
 		return $this->belongsToMany(
-			Authorize::roleClass(), Authorize::permitRolesTable(), 'permit_id', 'role_id'
+			Rbac::authorize()->roleClass,
+			Rbac::authorize()->permitRolesTable,
+			'permit_id', 'role_id'
 		);
 	}
 	
 	public function users(): BelongsToMany
 	{
 		return $this->morphedByMany(
-			Authorize::authClass(), 'permitable'
+			Rbac::authorize()->userClass, 'permitable'
 		);
 	}
 	
 	public function givePermitToRoles(...$roles)
 	{
-		$roleModels = Authorize::getPermitOrRoleModels(Authorize::roleInstance(), $roles);
+		$roleModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->roleInstance, $roles);
 		$this->roleItems()->sync($roleModels->pluck('id'));
 		$this->load('roleItems');
 		return $this;
@@ -82,7 +90,7 @@ class Permit extends Model implements PermitContract
 	
 	public function removePermitToRoles(...$roles)
 	{
-		$roleModels = Authorize::getPermitOrRoleModels(Authorize::roleInstance(), $roles);
+		$roleModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->roleInstance, $roles);
 		$this->roleItems()->detach($roleModels->pluck('id'));
 		$this->load('roleItems');
 		return $this;
@@ -90,7 +98,7 @@ class Permit extends Model implements PermitContract
 	
 	public function hasRoleItem($role)
 	{
-		$roleModel = (Authorize::getPermitOrRoleModels(Authorize::roleInstance(), $role))[0];
+		$roleModel = (Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->roleInstance, $role))[0];
 		return $this->roleItems->containsStrict('id', $roleModel->id);
 	}
 }

@@ -1,9 +1,9 @@
 <?php
-namespace Rainsens\Authorize\Middlewares;
+namespace Rainsens\Rbac\Middlewares;
 
 use Closure;
 use Illuminate\Support\Facades\Auth;
-use Rainsens\Authorize\Exceptions\UnauthorizedException;
+use Rainsens\Rbac\Exceptions\UnauthorizedException;
 
 class Role
 {

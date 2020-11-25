@@ -1,5 +1,5 @@
 <?php
-namespace Rainsens\Authorize\Traits;
+namespace Rainsens\Rbac\Traits;
 
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Collection;

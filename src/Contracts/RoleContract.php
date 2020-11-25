@@ -1,5 +1,5 @@
 <?php
-namespace Rainsens\Authorize\Contracts;
+namespace Rainsens\Rbac\Contracts;
 
 interface RoleContract
 {

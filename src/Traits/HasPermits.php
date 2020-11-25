@@ -1,7 +1,7 @@
 <?php
-namespace Rainsens\Authorize\Traits;
+namespace Rainsens\Rbac\Traits;
 
-use Rainsens\Authorize\Facades\Authorize;
+use Rainsens\Rbac\Facades\Rbac;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 trait HasPermits
@@ -22,7 +22,7 @@ trait HasPermits
 	public function permits(): BelongsToMany
 	{
 		return $this->morphToMany(
-			Authorize::permitClass(), 'permitable'
+			Rbac::permitClass(), 'permitable'
 		);
 	}
 	

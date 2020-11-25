@@ -3,7 +3,7 @@
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 
 use Faker\Generator as Faker;
-use Rainsens\Authorize\Models\Role;
+use Rainsens\Rbac\Models\Role;
 
 $factory->define(Role::class, function (Faker $faker) {
 	return [

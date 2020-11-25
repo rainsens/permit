@@ -13,9 +13,9 @@ return [
 	
 	'models' => [
 		
-		'permit' => Rainsens\Authorize\Models\Permit::class,
+		'permit' => Rainsens\Rbac\Models\Permit::class,
 		
-		'role' => Rainsens\Authorize\Models\Role::class,
+		'role' => Rainsens\Rbac\Models\Role::class,
 	],
 	'table_names' => [
 		
