@@ -32,5 +32,8 @@ class TestCase extends \Orchestra\Testbench\TestCase
 		$rbacConfig = require _base_path('config/rbac.php');
 		config(['rbac' => $rbacConfig]);
 		config(['auth.providers.users.model' => User::class]);
+		
+		include_once _base_path('tests/Dummy/Database/Migrations/create_users_table.php');
+		(new \CreateUsersTable())->up();
 	}
 }

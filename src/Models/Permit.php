@@ -12,7 +12,8 @@ use Rainsens\Rbac\Facades\Rbac;
 /**
  * Class Permit
  * @package Rainsens\Rbac\Models
- * @property Collection $roleItems
+ * @property Collection $roles
+ * @property Collection $users
  */
 class Permit extends Model implements PermitContract
 {
@@ -64,41 +65,68 @@ class Permit extends Model implements PermitContract
 		return $permit;
 	}
 	
-	public function roleItems()
+	public function roles()
 	{
 		return $this->belongsToMany(
 			Rbac::authorize()->roleClass,
 			Rbac::authorize()->permitRolesTable,
-			'permit_id', 'role_id'
+			'permit_id',
+			'role_id'
 		);
 	}
 	
 	public function users(): BelongsToMany
 	{
 		return $this->morphedByMany(
-			Rbac::authorize()->userClass, 'permitable'
+			Rbac::authorize()->userClass,
+			'permitable',
+			Rbac::authorize()->permitUsersTable,
+			'permit_id',
+			'permitable_id'
 		);
 	}
 	
-	public function givePermitToRoles(...$roles)
+	public function giveToRoles(...$roles)
 	{
 		$roleModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->roleInstance, $roles);
-		$this->roleItems()->sync($roleModels->pluck('id'));
-		$this->load('roleItems');
+		$this->roles()->sync($roleModels->pluck('id'));
+		$this->load('roles');
 		return $this;
 	}
 	
-	public function removePermitToRoles(...$roles)
+	public function removeFromRoles(...$roles)
 	{
 		$roleModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->roleInstance, $roles);
-		$this->roleItems()->detach($roleModels->pluck('id'));
-		$this->load('roleItems');
+		$this->roles()->detach($roleModels->pluck('id'));
+		$this->load('roles');
 		return $this;
 	}
 	
-	public function hasRoleItem($role)
+	public function giveToUsers(...$users)
 	{
-		$roleModel = (Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->roleInstance, $role))[0];
-		return $this->roleItems->containsStrict('id', $roleModel->id);
+		$userModels = Rbac::authorize()->getUserModels($users);
+		$this->users()->sync($userModels->pluck('id'));
+		$this->load('users');
+		return $this;
+	}
+	
+	public function removeFromUsers(...$users)
+	{
+		$userModels = Rbac::authorize()->getUserModels($users);
+		$this->users()->detach($userModels->pluck('id'));
+		$this->load('users');
+		return $this;
+	}
+	
+	public function underRole($role)
+	{
+		$roleModel = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->roleInstance, $role)->first();
+		return $this->roles->containsStrict('id', $roleModel->id);
+	}
+	
+	public function underUser($user)
+	{
+		$userModel = Rbac::authorize()->getUserModels($user)->first();
+		return $this->users->containsStrict('id', $userModel->id);
 	}
 }

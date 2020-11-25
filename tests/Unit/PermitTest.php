@@ -3,6 +3,7 @@ namespace Rainsens\Permit\Tests\Unit;
 
 use Rainsens\Rbac\Models\Permit;
 use Rainsens\Rbac\Models\Role;
+use Rainsens\Rbac\Tests\Dummy\Models\User;
 use Rainsens\Rbac\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -75,15 +76,15 @@ class PermitTest extends TestCase
 			'name' => 'author'
 		]);
 		
-		$this->assertCount(0, $permit->roleItems);
+		$this->assertCount(0, $permit->roles);
 		
-		$permit->givePermitToRoles('editor', 'author');
+		$permit->giveToRoles('editor', 'author');
 		
-		$this->assertCount(2, $permit->refresh()->roleItems);
+		$this->assertCount(2, $permit->refresh()->roles);
 	}
 	
 	/** @test */
-	public function can_remove_permit_to_roles()
+	public function can_remove_permit_from_roles()
 	{
 		$permit = factory(Permit::class)->create([
 			'id' => 1,
@@ -96,15 +97,20 @@ class PermitTest extends TestCase
 			'name' => 'editor'
 		]);
 		
-		$permit->givePermitToRoles('editor');
-		$this->assertCount(1, $permit->refresh()->roleItems);
+		$r2 = factory(Role::class)->create([
+			'id' => 3,
+			'name' => 'author'
+		]);
 		
-		$permit->removePermitToRoles(2);
-		$this->assertCount(0, $permit->refresh()->roleItems);
+		$permit->giveToRoles($r1, $r2);
+		$this->assertCount(2, $permit->refresh()->roles);
+		
+		$permit->removeFromRoles(2);
+		$this->assertCount(1, $permit->refresh()->roles);
 	}
 	
 	/** @test */
-	public function can_check_if_a_permit_had_a_role()
+	public function can_check_if_a_permit_under_a_role()
 	{
 		$role = factory(Role::class)->create([
 			'id' => 1
@@ -116,10 +122,73 @@ class PermitTest extends TestCase
 			'path' => '/create-article'
 		]);
 		
-		$this->assertFalse($permit->hasRoleItem($role));
+		$this->assertFalse($permit->underRole($role));
 		
-		$permit->givePermitToRoles($role);
+		$permit->giveToRoles($role);
 		
-		$this->assertTrue($permit->refresh()->hasRoleItem($role));
+		$this->assertTrue($permit->refresh()->underRole($role));
+	}
+	
+	/** @test */
+	public function can_give_permit_to_users()
+	{
+		$permit = factory(Permit::class)->create([
+			'id' => 1,
+			'name' => 'Create Article',
+			'path' => '/create-article'
+		]);
+		
+		$u1 = factory(User::class)->create(['id' => 1]);
+		$u2 = factory(User::class)->create(['id' => 2]);
+		
+		$this->assertCount(0, $permit->users);
+		
+		$permit->giveToUsers($u1, $u2);
+		
+		$this->assertCount(2, $permit->refresh()->users);
+	}
+	
+	/** @test */
+	public function can_remove_permit_from_users()
+	{
+		$permit = factory(Permit::class)->create([
+			'id' => 1,
+			'name' => 'Create Article',
+			'path' => '/create-article'
+		]);
+		
+		$u1 = factory(User::class)->create(['id' => 1]);
+		$u2 = factory(User::class)->create(['id' => 2]);
+		
+		$this->assertCount(0, $permit->users);
+		
+		$permit->giveToUsers($u1, $u2);
+		
+		$this->assertCount(2, $permit->refresh()->users);
+		
+		$permit->removeFromUsers($u1);
+		
+		$this->assertCount(1, $permit->refresh()->users);
+		$this->assertEquals(2, $permit->refresh()->users->first()->id);
+	}
+	
+	/** @test */
+	public function can_check_if_a_permit_under_a_user()
+	{
+		$user = factory(User::class)->create([
+			'id' => 1
+		]);
+		
+		$permit = factory(Permit::class)->create([
+			'id' => 1,
+			'name' => 'Create Article',
+			'path' => '/create-article'
+		]);
+		
+		$this->assertFalse($permit->underUser($user));
+		
+		$permit->giveToUsers($user);
+		
+		$this->assertTrue($permit->refresh()->underUser($user));
 	}
 }

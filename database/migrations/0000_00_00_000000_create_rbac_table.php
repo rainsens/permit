@@ -40,19 +40,19 @@ class CreateRbacTable extends Migration
         });
 	
 	    Schema::create($tableNames['permit_users'], function (Blueprint $table) use ($tableNames) {
-		    $table->bigIncrements('id');
+		    $table->unsignedBigInteger('permit_id');
 		    $table->unsignedBigInteger('permitable_id');
 		    $table->string('permitable_type');
 		
-		    $table->index(['permitable_id', 'permitable_type']);
+		    $table->index(['permit_id', 'permitable_id', 'permitable_type']);
 	    });
 
         Schema::create($tableNames['role_users'], function (Blueprint $table) use ($tableNames) {
-        	$table->bigIncrements('id');
+        	$table->unsignedBigInteger('role_id');
         	$table->unsignedBigInteger('rolable_id');
         	$table->string('rolable_type');
             
-            $table->index(['rolable_id', 'rolable_type']);
+            $table->index(['role_id', 'rolable_id', 'rolable_type']);
         });
     }
     

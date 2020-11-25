@@ -51,11 +51,11 @@ class RoleTest extends TestCase
 			'id' => 1
 		]);
 		
-		$this->assertCount(0, $role->permitItems);
+		$this->assertCount(0, $role->permits);
 		
-		$role->giveRolePermits($p1, $p2);
+		$role->givePermits($p1, $p2);
 		
-		$this->assertCount(2, $role->refresh()->permitItems);
+		$this->assertCount(2, $role->refresh()->permits);
 	}
 	
 	/** @test */
@@ -77,13 +77,13 @@ class RoleTest extends TestCase
 			'path' => '/edit-article'
 		]);
 		
-		$role->giveRolePermits($p1, $p2);
+		$role->givePermits($p1, $p2);
 		
-		$this->assertCount(2, $role->refresh()->permitItems);
+		$this->assertCount(2, $role->refresh()->permits);
 		
-		$role->removeRolePermits(1, 2);
+		$role->removePermits(1, 2);
 		
-		$this->assertCount(0, $role->refresh()->permitItems);
+		$this->assertCount(0, $role->refresh()->permits);
 	}
 	
 	/** @test */
@@ -105,12 +105,12 @@ class RoleTest extends TestCase
 			'path' => '/edit-article'
 		]);
 		
-		$this->assertFalse($role->hasPermitItem($p1));
+		$this->assertFalse($role->hasPermit($p1));
 		
-		$role->giveRolePermits($p1);
+		$role->givePermits($p1);
 		
-		$this->assertTrue($role->refresh()->hasPermitItem($p1));
+		$this->assertTrue($role->refresh()->hasPermit($p1));
 		
-		$this->assertFalse($role->refresh()->hasPermitItem($p2));
+		$this->assertFalse($role->refresh()->hasPermit($p2));
 	}
 }

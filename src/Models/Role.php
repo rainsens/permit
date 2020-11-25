@@ -12,7 +12,7 @@ use Rainsens\Rbac\Facades\Rbac;
 /**
  * Class Role
  * @package Rainsens\Rbac\Models
- * @property Collection $permitItems
+ * @property Collection $permits
  */
 class Role extends Model implements RoleContract
 {
@@ -57,7 +57,7 @@ class Role extends Model implements RoleContract
 		return $role;
 	}
 	
-	public function permitItems(): BelongsToMany
+	public function permits(): BelongsToMany
 	{
 		return $this->belongsToMany(
 			Rbac::authorize()->permitClass,
@@ -69,29 +69,33 @@ class Role extends Model implements RoleContract
 	public function users(): BelongsToMany
 	{
 		return $this->morphedByMany(
-			Rbac::authorize()->userClass, 'rolable'
+			Rbac::authorize()->userClass,
+			'rolable',
+			Rbac::authorize()->roleUsersTable,
+			'role_id',
+			'rolable_id'
 		);
 	}
 	
-	public function giveRolePermits(...$permits)
+	public function givePermits(...$permits)
 	{
 		$permitModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->permitInstance, $permits);
-		$this->permitItems()->sync($permitModels->pluck('id'));
-		$this->load('permitItems');
+		$this->permits()->sync($permitModels->pluck('id'));
+		$this->load('permits');
 		return $this;
 	}
 	
-	public function removeRolePermits(...$permits)
+	public function removePermits(...$permits)
 	{
 		$permitModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->permitInstance, $permits);
-		$this->permitItems()->detach($permitModels->pluck('id'));
-		$this->load('permitItems');
+		$this->permits()->detach($permitModels->pluck('id'));
+		$this->load('permits');
 		return $this;
 	}
 	
-	public function hasPermitItem($permit)
+	public function hasPermit($permit)
 	{
-		$permitModel = (Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->permitInstance, $permit))[0];
-		return $this->permitItems->containsStrict('id', $permitModel->id);
+		$permitModel = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->permitInstance, $permit)->first();
+		return $this->permits->containsStrict('id', $permitModel->id);
 	}
 }

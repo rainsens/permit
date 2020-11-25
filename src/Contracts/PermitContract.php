@@ -9,7 +9,7 @@ interface PermitContract
 	
 	public static function findById(int $id);
 	
-	public function roleItems();
+	public function roles();
 	
 	public function users();
 }

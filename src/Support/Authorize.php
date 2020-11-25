@@ -1,6 +1,7 @@
 <?php
 namespace Rainsens\Rbac\Support;
 
+use Illuminate\Support\Collection;
 use Rainsens\Rbac\Contracts\PermitContract;
 use Rainsens\Rbac\Contracts\RoleContract;
 use Rainsens\Rbac\Exceptions\InvalidArgumentException;
@@ -82,11 +83,32 @@ class Authorize
 		return $class;
 	}
 	
-	public function getPermitOrRoleModels($instance, ...$params)
+	public function getPermitOrRoleModels($instance, ...$params): Collection
 	{
 		$guareName = $this->guard()->name;
 		
-		$params = collect($params)
+		$params = $this->getParams($params);
+		
+		return $instance
+			->where('guard', $guareName)
+			->whereIn('id', $params->toArray())
+			->orWhereIn('name', $params->toArray())
+			->get();
+	}
+	
+	public function getUserModels(...$params): Collection
+	{
+		$params = $this->getParams($params);
+		
+		return $this->userInstance
+			->whereIn('id', $params->toArray())
+			->orWhereIn('name', $params->toArray())
+			->get();
+	}
+	
+	private function getParams(...$params)
+	{
+		return collect($params)
 			->flatten()
 			->map(function ($value) {
 				if (is_object($value)) {
@@ -95,12 +117,6 @@ class Authorize
 					return $value;
 				}
 			});
-		
-		return $instance
-			->where('guard', $guareName)
-			->whereIn('id', $params->toArray())
-			->orWhereIn('name', $params->toArray())
-			->get();
 	}
 	
 	public function guard(): Guard
