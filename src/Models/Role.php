@@ -21,7 +21,7 @@ class Role extends Model implements RoleContract
 	
 	public function getTable()
 	{
-		return config('permits.table_names.roles', parent::getTable());
+		return config('permits.tables.roles', parent::getTable());
 	}
 	
 	public static function create(string $roleName)
@@ -63,7 +63,8 @@ class Role extends Model implements RoleContract
 		return $this->belongsToMany(
 			Rbac::authorize()->permitClass,
 			Rbac::authorize()->permitRolesTable,
-			'role_id', 'permit_id'
+			'role_id',
+			'permit_id'
 		);
 	}
 	
@@ -71,10 +72,10 @@ class Role extends Model implements RoleContract
 	{
 		return $this->morphedByMany(
 			Rbac::authorize()->userClass,
-			'rolable',
+			Rbac::authorize()->roleMorphName,
 			Rbac::authorize()->roleUsersTable,
-			'role_id',
-			'rolable_id'
+			Rbac::authorize()->roleMorphId,
+			Rbac::authorize()->roleMorphKey
 		);
 	}
 	

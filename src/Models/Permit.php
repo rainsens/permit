@@ -29,7 +29,7 @@ class Permit extends Model implements PermitContract
 	
 	public function getTable()
 	{
-		return config('permits.table_names.permits', parent::getTable());
+		return config('permits.tables.permits', parent::getTable());
 	}
 	
 	public static function create(string $permitName)
@@ -79,10 +79,10 @@ class Permit extends Model implements PermitContract
 	{
 		return $this->morphedByMany(
 			Rbac::authorize()->userClass,
-			'permitable',
+			Rbac::authorize()->permitMorphName,
 			Rbac::authorize()->permitUsersTable,
-			'permit_id',
-			'permitable_id'
+			Rbac::authorize()->permitMorphId,
+			Rbac::authorize()->permitMorphKey
 		);
 	}
 	

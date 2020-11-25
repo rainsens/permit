@@ -8,13 +8,14 @@ class CreateRbacTable extends Migration
 {
     public function up()
     {
-        $tableNames = config('rbac.table_names');
+        $tables = config('rbac.tables');
+        $columns = config('rbac.columns');
 	    
-        if (empty($tableNames)) {
+        if (empty($tables)) {
             throw new Exception('Error: config/rbac.php not found.');
         }
 	
-	    Schema::create($tableNames['permits'], function (Blueprint $table) {
+	    Schema::create($tables['permits'], function (Blueprint $table) {
 		    $table->bigIncrements('id');
 		    $table->string('slug')->nullable();
 		    $table->string('name')->unique();
@@ -24,7 +25,7 @@ class CreateRbacTable extends Migration
 		    $table->timestamps();
 	    });
 	
-	    Schema::create($tableNames['roles'], function (Blueprint $table) {
+	    Schema::create($tables['roles'], function (Blueprint $table) {
 		    $table->bigIncrements('id');
 		    $table->string('slug')->nullable();
 		    $table->string('name')->unique();
@@ -32,42 +33,42 @@ class CreateRbacTable extends Migration
 		    $table->timestamps();
 	    });
 
-        Schema::create($tableNames['permit_roles'], function (Blueprint $table) use ($tableNames) {
+        Schema::create($tables['permit_roles'], function (Blueprint $table) use ($tables) {
             $table->unsignedBigInteger('permit_id');
         	$table->unsignedBigInteger('role_id');
             
             $table->unique(['permit_id', 'role_id']);
         });
 	
-	    Schema::create($tableNames['permit_users'], function (Blueprint $table) use ($tableNames) {
-		    $table->unsignedBigInteger('permit_id');
-		    $table->unsignedBigInteger('permitable_id');
-		    $table->string('permitable_type');
+	    Schema::create($tables['permit_users'], function (Blueprint $table) use ($tables, $columns) {
+		    $table->unsignedBigInteger($columns['permit_morph_id']);
+		    $table->unsignedBigInteger($columns['permit_morph_key']);
+		    $table->string($columns['permit_morph_type']);
 		
-		    $table->index(['permit_id', 'permitable_id', 'permitable_type']);
+		    $table->index([$columns['permit_morph_id'], $columns['permit_morph_key'], $columns['permit_morph_type']]);
 	    });
 
-        Schema::create($tableNames['role_users'], function (Blueprint $table) use ($tableNames) {
-        	$table->unsignedBigInteger('role_id');
-        	$table->unsignedBigInteger('rolable_id');
-        	$table->string('rolable_type');
+        Schema::create($tables['role_users'], function (Blueprint $table) use ($tables, $columns) {
+        	$table->unsignedBigInteger($columns['role_morph_id']);
+        	$table->unsignedBigInteger($columns['role_morph_key']);
+        	$table->string($columns['role_morph_type']);
             
-            $table->index(['role_id', 'rolable_id', 'rolable_type']);
+            $table->index([$columns['role_morph_id'], $columns['role_morph_key'], $columns['role_morph_type']]);
         });
     }
     
     public function down()
     {
-        $tableNames = config('rbac.table_names');
+        $tables = config('rbac.tables');
 
-        if (empty($tableNames)) {
+        if (empty($tables)) {
             throw new Exception('Error: config/rbac.php not found.');
         }
 
-        Schema::drop($tableNames['role_users']);
-        Schema::drop($tableNames['permit_users']);
-        Schema::drop($tableNames['role_permits']);
-        Schema::drop($tableNames['roles']);
-        Schema::drop($tableNames['permits']);
+        Schema::drop($tables['role_users']);
+        Schema::drop($tables['permit_users']);
+        Schema::drop($tables['role_permits']);
+        Schema::drop($tables['roles']);
+        Schema::drop($tables['permits']);
     }
 }
