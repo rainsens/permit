@@ -161,4 +161,24 @@ class Authorize
 	{
 		return isset($this->$name) ? $this->$name : null;
 	}
+	
+	public function contains($owner, ...$authorizations)
+	{
+		$guareName = $this->guard()->name;
+		
+		$params = $this->getParams($authorizations);
+		
+		$role = $user = null;
+		
+		// 1. Check Role or User
+		if ($owner instanceof Role) {
+			$role = $owner;
+		} else {
+			$user = $owner;
+		}
+		
+		// 2. If check role
+		
+		// 3. If check user
+	}
 }

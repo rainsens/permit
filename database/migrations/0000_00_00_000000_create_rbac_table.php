@@ -19,8 +19,8 @@ class CreateRbacTable extends Migration
 		    $table->bigIncrements('id');
 		    $table->string('slug')->nullable();
 		    $table->string('name')->unique();
+		    $table->string('path')->nullable();
 		    $table->string('method')->nullable();
-		    $table->text('path')->nullable();
 		    $table->string('guard');
 		    $table->timestamps();
 	    });

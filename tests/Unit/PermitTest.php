@@ -22,17 +22,22 @@ class PermitTest extends TestCase
 	}
 	
 	/** @test */
-	public function can_create_a_new_permit_with_guard_name()
+	public function can_create_a_new_permit_with_route()
 	{
 		$this->assertCount(0, Permit::all());
-		$permit = Permit::create('edit articles', 'web');
+		
+		$path = '/products';
+		$method = 'get';
+		
+		$permit = Permit::create('Products', $path, $method);
 		
 		$this->assertCount(1, Permit::all());
-		$this->assertEquals('web', $permit->guard);
+		$this->assertEquals('/products', $permit->path);
+		$this->assertEquals('GET', $permit->method);
 	}
 	
 	/** @test */
-	public function find_a_permit_by_name()
+	public function can_find_a_permit_by_name()
 	{
 		factory(Permit::class)->create([
 			'id' => 1,
@@ -45,7 +50,7 @@ class PermitTest extends TestCase
 	}
 	
 	/** @test */
-	public function find_a_permit_by_id()
+	public function can_find_a_permit_by_id()
 	{
 		factory(Permit::class)->create([
 			'id' => 2,
@@ -55,6 +60,16 @@ class PermitTest extends TestCase
 		
 		$permit = Permit::findById(2);
 		$this->assertEquals('/edit-article', $permit->path);
+	}
+	
+	/** @test */
+	public function can_find_a_permit_by_route()
+	{
+		createPermit(['path' => '/articles', 'method' => 'get']);
+		$permit = Permit::findByPath('/articles');
+		
+		$this->assertEquals('GET', $permit->method);
+		$this->assertEquals('/articles', $permit->path);
 	}
 	
 	/** @test */
@@ -262,10 +277,10 @@ class PermitTest extends TestCase
 			'path' => '/create-article'
 		]);
 		
-		$this->assertFalse($user->hasPermits($permit));
+		$this->assertFalse($user->hasDirectPermits($permit));
 		
 		$user->givePermits($permit);
 		
-		$this->assertTrue($user->refresh()->hasPermits($permit));
+		$this->assertTrue($user->refresh()->hasDirectPermits($permit));
 	}
 }

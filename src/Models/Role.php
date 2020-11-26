@@ -114,6 +114,7 @@ class Role extends Model implements RoleContract
 	public function hasPermits($permits)
 	{
 		$permitModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->permitInstance, $permits);
+		
 		foreach ($permitModels as $model) {
 			if (! $this->permits->containsStrict('id', $model->id)) {
 				return false;

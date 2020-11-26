@@ -5,6 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Collection;
 use Rainsens\Rbac\Contracts\PermitContract;
+use Rainsens\Rbac\Exceptions\InvalidArgumentException;
 use Rainsens\Rbac\Exceptions\PermitAlreadyExists;
 use Rainsens\Rbac\Exceptions\PermitDoesNotExist;
 use Rainsens\Rbac\Facades\Rbac;
@@ -23,43 +24,65 @@ class Permit extends Model implements PermitContract
 		'GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'
 	];
 	
-	protected $casts = [
-		'path' => 'json'
-	];
-	
 	public function getTable()
 	{
 		return config('permits.tables.permits', parent::getTable());
 	}
 	
-	public static function create(string $permitName)
+	public function setMethodAttribute($value)
 	{
-		$attributes['name'] = $permitName;
-		$attributes['guard'] = Rbac::guard()->name;;
+		$this->attributes['method'] = strtoupper($value);
+	}
+	
+	public function setPathAttribute($value)
+	{
+		$this->attributes['path'] = str_replace('\/', '/', $value);
+	}
+	
+	public static function create(string $name, string $path = null, string $method = null)
+	{
+		$attributes['name'] = $name;
+		$attributes['guard'] = Rbac::guard()->name;
+		
+		// Create with route
+		if (isset($path)) {
+			$attributes['path'] = $path;
+			$attributes['method'] = in_array(strtoupper($method), static::$methodMaps) ? $method : null;
+		}
 		
 		if (static::where($attributes)->first()) {
 			throw new PermitAlreadyExists("Permit provided already exists.");
 		}
+		
 		return static::query()->create($attributes);
 	}
 	
 	public static function findByName(string $name)
 	{
-		$permit = static::where(['name' => $name, 'guard' => Rbac::guard()->name])->first();
-		
-		if (! $permit) {
-			throw new PermitDoesNotExist('Permit name provided does not exist.');
-		}
-		
-		return $permit;
+		return static::where(['name' => $name, 'guard' => Rbac::guard()->name])->first();
 	}
 	
 	public static function findById(int $id)
 	{
-		$permit = static::where(['id' => $id, 'guard' => Rbac::guard()->name])->first();
+		return static::where(['id' => $id, 'guard' => Rbac::guard()->name])->first();
+	}
+	
+	public static function findByPath(string $path, string $method = null)
+	{
+		if (! isset($path)) {
+			throw new InvalidArgumentException('Permit path provided are not valid.');
+		}
 		
-		if (! $permit) {
-			throw new PermitDoesNotExist('Permit id provided does not exist.');
+		$attributes['path'] = $path;
+		
+		if (isset($method) && in_array(strtoupper($method), static::$methodMaps)) {
+			$attributes['method'] = strtoupper($method);
+		}
+		
+		$attributes['guard'] = Rbac::guard()->name;
+		
+		if (! $permit = static::where($attributes)->first()) {
+			throw new PermitDoesNotExist('Permit path provided does not exist.');
 		}
 		
 		return $permit;
@@ -118,7 +141,7 @@ class Permit extends Model implements PermitContract
 		return $this;
 	}
 	
-	public function underRoles($roles)
+	public function inRoles($roles)
 	{
 		$roleModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->roleInstance, $roles);
 		foreach ($roleModels as $model) {
@@ -129,7 +152,7 @@ class Permit extends Model implements PermitContract
 		return true;
 	}
 	
-	public function underUsers($users)
+	public function inUsers($users)
 	{
 		$userModels = Rbac::authorize()->getUserModels($users);
 		foreach ($userModels as $model) {
