@@ -7,9 +7,10 @@ use Rainsens\Rbac\Models\Permit;
 
 $factory->define(Permit::class, function (Faker $faker) {
 	return [
-		'slug' => 'articles.*',
 		'name' => 'Edit Articles',
+		'slug' => 'edit-articles',
 		'path' => '/',
-		'guard' => 'web'
+		'method' => 'get',
+		'guard' => 'web',
 	];
 });

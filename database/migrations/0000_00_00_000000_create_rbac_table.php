@@ -17,18 +17,18 @@ class CreateRbacTable extends Migration
 	
 	    Schema::create($tables['permits'], function (Blueprint $table) {
 		    $table->bigIncrements('id');
-		    $table->string('slug')->nullable();
-		    $table->string('name')->unique();
-		    $table->string('path')->nullable();
-		    $table->string('method')->nullable();
+		    $table->string('name');
+		    $table->string('slug')->unique();
+		    $table->text('path')->nullable();
+		    $table->text('method')->nullable();
 		    $table->string('guard');
 		    $table->timestamps();
 	    });
 	
 	    Schema::create($tables['roles'], function (Blueprint $table) {
 		    $table->bigIncrements('id');
-		    $table->string('slug')->nullable();
-		    $table->string('name')->unique();
+		    $table->string('name');
+		    $table->string('slug')->unique();
 		    $table->string('guard');
 		    $table->timestamps();
 	    });

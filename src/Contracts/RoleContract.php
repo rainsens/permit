@@ -3,7 +3,7 @@ namespace Rainsens\Rbac\Contracts;
 
 interface RoleContract
 {
-	public static function create(string $roleName);
+	public static function create(array $attributes);
 	
 	public static function findByName(string $name);
 	

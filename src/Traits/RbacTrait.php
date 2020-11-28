@@ -1,16 +1,17 @@
 <?php
 namespace Rainsens\Rbac\Traits;
 
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Rainsens\Rbac\Facades\Rbac;
+use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Rainsens\Rbac\Models\Permit;
 
 /**
  * Trait RbacTrait
  * @package Rainsens\Rbac\Traits
  * @property Collection $permits
+ * @property Collection $allPermits
  * @property Collection $roles
  */
 trait RbacTrait
@@ -26,6 +27,13 @@ trait RbacTrait
 		);
 	}
 	
+	public function allPermits(): Collection
+	{
+		return $this->roles()->with('permits')->get()
+			->pluck('permits')->flatten()
+			->merge($this->permits);
+	}
+	
 	public function roles(): BelongsToMany
 	{
 		return $this->morphToMany(
@@ -37,103 +45,115 @@ trait RbacTrait
 		);
 	}
 	
-	public function givePermits(...$permits)
+	/**
+	 * Find by 'id' and 'slug'
+	 */
+	public function givePermits($permits)
 	{
-		$permitModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->permitInstance, $permits);
-		$this->permits()->sync($permitModels->pluck('id'));
-		$this->load('permits');
-		return $this;
-	}
-	
-	public function removePermits(...$permits)
-	{
-		$permitModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->permitInstance, $permits);
-		$this->permits()->detach($permitModels->pluck('id'));
-		$this->load('permits');
-		return $this;
-	}
-	
-	public function giveRoles(...$roles)
-	{
-		$roleModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->roleInstance, $roles);
-		$this->roles()->sync($roleModels->pluck('id'));
-		$this->load('permits');
-		return $this;
-	}
-	
-	public function removeRoles(...$roles)
-	{
-		$roleModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->roleInstance, $roles);
-		$this->roles()->detach($roleModels->pluck('id'));
+		$expectedPermits = Rbac::supplier()->findExpectedModels(Rbac::authorize()->permitInstance, $permits);
+		$expectedButValidPermits = Rbac::guard()->examine($expectedPermits);
+		$this->permits()->sync($expectedButValidPermits);
 		$this->load('permits');
 		return $this;
 	}
 	
 	/**
-	 * If had given roles of current user.
+	 * Find by 'id' and 'slug'
+	 */
+	public function removePermits($permits)
+	{
+		$expectedPermits = Rbac::supplier()->findExpectedModels(Rbac::authorize()->permitInstance, $permits);
+		$expectedButValidPermits = Rbac::guard()->examine($expectedPermits);
+		$this->permits()->detach($expectedButValidPermits->pluck('id'));
+		$this->load('permits');
+		return $this;
+	}
+	
+	/**
+	 * Find by 'id' and 'slug'
+	 */
+	public function giveRoles($roles)
+	{
+		$expectedRoles = Rbac::supplier()->findExpectedModels(Rbac::authorize()->roleInstance, $roles);
+		$expectedButValidRoles = Rbac::guard()->examine($expectedRoles);
+		$this->roles()->sync($expectedButValidRoles);
+		$this->load('permits');
+		return $this;
+	}
+	
+	/**
+	 * Find by 'id' and 'slug'
+	 */
+	public function removeRoles($roles)
+	{
+		$expectedRoles = Rbac::supplier()->findExpectedModels(Rbac::authorize()->roleInstance, $roles);
+		$expectedButValidRoles = Rbac::guard()->examine($expectedRoles);
+		$this->roles()->detach($expectedButValidRoles->pluck('id'));
+		$this->load('permits');
+		return $this;
+	}
+	
+	/**
+	 * Find by 'id' and 'slug'
 	 */
 	public function hasRoles($roles)
 	{
-		$roleModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->roleInstance, $roles);
-		foreach ($roleModels as $model) {
-			if (! $this->roles->containsStrict('id', $model->id)) {
-				return false;
-			}
-		}
-		return true;
+		$expectedRoles = Rbac::supplier()->findExpectedModels(Rbac::authorize()->roleInstance, $roles);
+		$expectedButValidRoles = Rbac::guard()->examine($expectedRoles);
+		$valid = $expectedButValidRoles->pluck('id')->toArray();
+		$actual = $this->roles->pluck('id')->toArray();
+		return count(array_intersect($valid, $actual)) === count($valid);
 	}
 	
 	/**
-	 * If had given permits under roles of current user.
+	 * Find by 'id' and 'slug'
 	 */
 	public function hasPermits($permits)
 	{
-		$permitModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->permitInstance, $permits);
+		$expectedPermits = Rbac::supplier()->findExpectedModels(Rbac::authorize()->permitInstance, $permits);
+		$expectedButValidPermits = Rbac::guard()->examine($expectedPermits);
+		$valid = $expectedButValidPermits->pluck('id')->toArray();
+		$actual = $this->allPermits()->pluck('id')->toArray();
+		return count(array_intersect($valid, $actual)) === count($valid);
+	}
+	
+	public function hasPathPermit()
+	{
+		$args = Rbac::supplier()->pathArgs();
 		
-		foreach ($this->roles as $role) {
-			$permitIds = $permitModels->pluck('id');
-			if (! $role->permits->contains('id', $permitModels->)) {
-			
+		// If path has not definded, all users are allowed to access.
+		if (! Permit::all()->pluck('path')->flatten()->contains($args['path'])) {
+			return true;
+		}
+		
+		$methodAndPath = $path = false;
+		foreach (Rbac::guard()->examine($this->allPermits()) as $permit) {
+			if ($permit->method) {
+				// Target in method and path array directly
+				if (in_array($args['method'], $permit->method) and in_array($args['path'], $permit->path)) {
+					$methodAndPath = true;
+				}
+				// Target path with wildcard
+				$methodAndPath = $permit->path->map(function ($item) use ($args) {
+					if (Str::endsWith($item, '*')) {
+						return in_array($args['method'], $item->method) and Str::contains($item, $args['path']);
+					}
+					return false;
+				});
+			} else {
+				// Target path in path array directly.
+				if (in_array($args['path'], $permit->path)) {
+					$path = true;
+				}
+				// Target path with wildcard
+				$path = $permit->path->map(function ($item) use ($args) {
+					if (Str::endsWith($item, '*')) {
+						return Str::contains($item, $args['path']);
+					}
+					return false;
+				});
 			}
 		}
-	}
-	
-	/**
-	 * If had given permits under current user directly.
-	 */
-	public function hasDirectPermits($permits)
-	{
-		$permitModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->permitInstance, $permits);
-		
-		foreach ($permitModels as $model) {
-			if (! $this->permits->containsStrict('id', $model->id)) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	/**
-	 * If had given path permits under roles of current user.
-	 */
-	public function hasPathPermit(Request $request)
-	{
-	
-	}
-	
-	/**
-	 * If had given path permits under current user directly.
-	 */
-	public function hasDirectPathPermits(Request $request)
-	{
-		$path = $request->path() ?? '/';
-		$method = $request->method();
-		
-		return $this->permits->contains(function ($item) use ($path, $method) {
-			if ($item->method) {
-				return $item->path === $path && $item->method === $method;
-			}
-			return $item->path === $path;
-		});
+		return $methodAndPath || $path;
 	}
 }

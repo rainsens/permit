@@ -5,6 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Collection;
 use Rainsens\Rbac\Contracts\RoleContract;
+use Rainsens\Rbac\Exceptions\InvalidArgumentException;
 use Rainsens\Rbac\Exceptions\RoleAlreadyExists;
 use Rainsens\Rbac\Exceptions\RoleDoesNotExist;
 use Rainsens\Rbac\Facades\Rbac;
@@ -14,6 +15,7 @@ use Rainsens\Rbac\Facades\Rbac;
  * @package Rainsens\Rbac\Models
  * @property Collection $permits
  * @property Collection $users
+ * @property $guard
  */
 class Role extends Model implements RoleContract
 {
@@ -24,15 +26,25 @@ class Role extends Model implements RoleContract
 		return config('permits.tables.roles', parent::getTable());
 	}
 	
-	public static function create(string $roleName)
+	protected static function boot()
 	{
-		$attributes['name'] = $roleName;
-		$attributes['guard'] = Rbac::guard()->name;
-		
-		if (static::where($attributes)->first()) {
-			throw new RoleAlreadyExists("Role name provided already exists.");
+		parent::boot();
+		static::deleting(function (Role $model) {
+			$model->users()->detach();
+			$model->permits()->detach();
+		});
+	}
+	
+	public static function create(array $attributes)
+	{
+		if (! isset($attributes['name']) or ! isset($attributes['slug'])) {
+			throw new InvalidArgumentException('Role name and slug both are required.');
 		}
 		
+		$attributes['guard'] = Rbac::guard()->name;
+		if (static::where($attributes)->first()) {
+			throw new RoleAlreadyExists("Role provided already exists.");
+		}
 		return static::query()->create($attributes);
 	}
 	
@@ -43,7 +55,6 @@ class Role extends Model implements RoleContract
 		if (! $role) {
 			throw new RoleDoesNotExist("Role name provided does not exist.");
 		}
-		
 		return $role;
 	}
 	
@@ -54,7 +65,6 @@ class Role extends Model implements RoleContract
 		if (! $role) {
 			throw new RoleDoesNotExist("Role id provided does not exist.");
 		}
-		
 		return $role;
 	}
 	
@@ -79,58 +89,75 @@ class Role extends Model implements RoleContract
 		);
 	}
 	
+	/**
+	 * Find by 'id' and 'slug'
+	 */
 	public function givePermits(...$permits)
 	{
-		$permitModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->permitInstance, $permits);
-		$this->permits()->sync($permitModels->pluck('id'));
+		$expectedPermits = Rbac::supplier()->findExpectedModels(Rbac::authorize()->permitInstance, $permits);
+		$expectedButValidPermits = Rbac::guard()->examine($expectedPermits, $this->guard);
+		$this->permits()->sync($expectedButValidPermits->pluck('id'));
 		$this->load('permits');
 		return $this;
 	}
 	
+	/**
+	 * Find by 'id' and 'slug'
+	 */
 	public function removePermits(...$permits)
 	{
-		$permitModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->permitInstance, $permits);
-		$this->permits()->detach($permitModels->pluck('id'));
+		$expectedPermits = Rbac::supplier()->findExpectedModels(Rbac::authorize()->permitInstance, $permits);
+		$expectedButValidPermits = Rbac::guard()->examine($expectedPermits, $this->guard);
+		$this->permits()->detach($expectedButValidPermits->pluck('id'));
 		$this->load('permits');
 		return $this;
 	}
 	
+	/**
+	 * Find by 'id' and 'slug'
+	 */
 	public function giveToUsers(...$users)
 	{
-		$userModels = Rbac::authorize()->getUserModels($users);
-		$this->users()->sync($userModels->pluck('id'));
+		$expectedUsers = Rbac::supplier()->findExpectedModels(Rbac::authorize()->userInstance, $users);
+		$expectedButValidUsers = Rbac::guard()->examine($expectedUsers, $this->guard);
+		$this->users()->sync($expectedButValidUsers->pluck('id'));
 		$this->load('users');
 		return $this;
 	}
 	
+	/**
+	 * Find by 'id' and 'slug'
+	 */
 	public function removeFromUsers(...$users)
 	{
-		$userModels = Rbac::authorize()->getUserModels($users);
-		$this->users()->detach($userModels->pluck('id'));
+		$expectedUsers = Rbac::supplier()->findExpectedModels(Rbac::authorize()->userInstance, $users);
+		$expectedButValidUsers = Rbac::guard()->examine($expectedUsers, $this->guard);
+		$this->users()->detach($expectedButValidUsers->pluck('id'));
 		$this->load('users');
 		return $this;
 	}
 	
-	public function hasPermits($permits)
+	/**
+	 * Find by 'id' and 'slug'
+	 */
+	public function hasPermits(...$permits)
 	{
-		$permitModels = Rbac::authorize()->getPermitOrRoleModels(Rbac::authorize()->permitInstance, $permits);
-		
-		foreach ($permitModels as $model) {
-			if (! $this->permits->containsStrict('id', $model->id)) {
-				return false;
-			}
-		}
-		return true;
+		$expectedPermits = Rbac::supplier()->findExpectedModels(Rbac::authorize()->permitInstance, $permits);
+		$expectedButValidPermits = Rbac::guard()->examine($expectedPermits, $this->guard);
+		$valid = $expectedButValidPermits->pluck('id')->toArray();
+		$actual = $this->permits->pluck('id')->toArray();
+		return count(array_intersect($valid, $actual)) === count($valid);
 	}
 	
-	public function underUsers($users)
+	/**
+	 * Find by 'id' and 'slug'
+	 */
+	public function inUsers(...$users)
 	{
-		$userModels = Rbac::authorize()->getUserModels($users);
-		foreach ($userModels as $model) {
-			if (! $this->users->containsStrict('id', $model->id)) {
-				return false;
-			}
-		}
-		return true;
+		$expectedUsers = Rbac::supplier()->findExpectedModels(Rbac::authorize()->userInstance, $users);
+		$expectedButValidUsers = Rbac::guard()->examine($expectedUsers, $this->guard);
+		$expected = $expectedButValidUsers->pluck('id')->toArray();
+		$actual = $this->users->pluck('id')->toArray();
+		return count(array_intersect($expected, $actual)) === count($expected);
 	}
 }

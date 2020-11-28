@@ -1,6 +1,9 @@
 <?php
 namespace Rainsens\Rbac\Support;
 
+use Illuminate\Support\Collection;
+use Rainsens\Rbac\Contracts\PermitContract;
+use Rainsens\Rbac\Contracts\RoleContract;
 use Rainsens\Rbac\Exceptions\GuardDoesNotExist;
 use Rainsens\Rbac\Exceptions\GuardProviderDoesNotExist;
 
@@ -54,6 +57,41 @@ class Guard
 	public function defaultName(): string
 	{
 		return config('auth.defaults.guard');
+	}
+	
+	/**
+	 * 1. Part 1 check whether given permits or roles have right specified guard name,
+	 * 2. Part 2 check whether given examin gist within Rbac guard,
+	 * then return the valid records.
+	 *
+	 * @param Collection $records
+	 * @param null $examineGist
+	 * @return Collection
+	 */
+	public function examine(Collection $records, $examineGist = null): Collection
+	{
+		$guardName = $examineGist ?? $this->name;
+		
+		// Get one instance of Permit or Role or User
+		$firstRecord = $records->first();
+		
+		if ($firstRecord instanceof PermitContract or $firstRecord instanceof RoleContract) {
+			return $records->map(function ($record) use ($guardName) {
+				if ($record->guard === $guardName) {
+					return $record;
+				}
+			});
+		}
+		
+		/**
+		 * Because user has no guard name,
+		 * therefore check whether expected examineGist within right config('rbac.guard').
+		 */
+		if ($examineGist === $this->name and $firstRecord instanceof $this->providerClass) {
+			return $records;
+		}
+		
+		return collect();
 	}
 	
 	public function __get($name)

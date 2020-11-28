@@ -7,7 +7,7 @@ use Rainsens\Rbac\Models\Role;
 
 $factory->define(Role::class, function (Faker $faker) {
 	return [
-		'slug' => 'manger.*',
+		'slug' => $faker->uuid,
 		'name' => 'Manager',
 		'guard' => 'web'
 	];

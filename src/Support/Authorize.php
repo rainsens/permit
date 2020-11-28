@@ -1,12 +1,12 @@
 <?php
 namespace Rainsens\Rbac\Support;
 
-use Illuminate\Support\Collection;
-use Rainsens\Rbac\Contracts\PermitContract;
-use Rainsens\Rbac\Contracts\RoleContract;
-use Rainsens\Rbac\Exceptions\InvalidArgumentException;
-use Rainsens\Rbac\Models\Permit;
 use Rainsens\Rbac\Models\Role;
+use Rainsens\Rbac\Facades\Rbac;
+use Rainsens\Rbac\Models\Permit;
+use Rainsens\Rbac\Contracts\RoleContract;
+use Rainsens\Rbac\Contracts\PermitContract;
+use Rainsens\Rbac\Exceptions\InvalidArgumentException;
 
 /**
  * Class Authorize
@@ -77,7 +77,7 @@ class Authorize
 		
 		$this->permitClass = $this->permitClass();
 		$this->roleClass = $this->roleClass();
-		$this->userClass = $this->guard()->providerClass;
+		$this->userClass = Rbac::guard()->providerClass;
 		
 		$this->permitInstance = app($this->permitClass);
 		$this->roleInstance = app($this->roleClass);
@@ -116,69 +116,8 @@ class Authorize
 		return $class;
 	}
 	
-	public function getPermitOrRoleModels($instance, ...$params): Collection
-	{
-		$guareName = $this->guard()->name;
-		
-		$params = $this->getParams($params);
-		
-		return $instance
-			->where('guard', $guareName)
-			->whereIn('id', $params->toArray())
-			->orWhereIn('name', $params->toArray())
-			->get();
-	}
-	
-	public function getUserModels(...$params): Collection
-	{
-		$params = $this->getParams($params);
-		
-		return $this->userInstance
-			->whereIn('id', $params->toArray())
-			->orWhereIn('name', $params->toArray())
-			->get();
-	}
-	
-	private function getParams(...$params)
-	{
-		return collect($params)
-			->flatten()
-			->map(function ($value) {
-				if (is_object($value)) {
-					return $value->id;
-				} else {
-					return $value;
-				}
-			});
-	}
-	
-	public function guard(): Guard
-	{
-		return app(Guard::class);
-	}
-	
 	public function __get($name)
 	{
 		return isset($this->$name) ? $this->$name : null;
-	}
-	
-	public function contains($owner, ...$authorizations)
-	{
-		$guareName = $this->guard()->name;
-		
-		$params = $this->getParams($authorizations);
-		
-		$role = $user = null;
-		
-		// 1. Check Role or User
-		if ($owner instanceof Role) {
-			$role = $owner;
-		} else {
-			$user = $owner;
-		}
-		
-		// 2. If check role
-		
-		// 3. If check user
 	}
 }

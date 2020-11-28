@@ -2,8 +2,6 @@
 namespace Rainsens\Permit\Tests\Unit;
 
 use Rainsens\Rbac\Models\Permit;
-use Rainsens\Rbac\Models\Role;
-use Rainsens\Rbac\Tests\Dummy\Models\User;
 use Rainsens\Rbac\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -15,84 +13,90 @@ class PermitTest extends TestCase
 	public function can_create_a_new_permit()
 	{
 		$this->assertCount(0, Permit::all());
-		$permit = Permit::create('edit articles');
+		$permit = Permit::create([
+			'name' => 'edit articles',
+			'slug' => 'create-articles'
+		]);
 		
 		$this->assertCount(1, Permit::all());
 		$this->assertEquals('edit articles', $permit->name);
+		$this->assertEquals('create-articles', $permit->slug);
 	}
 	
 	/** @test */
-	public function can_create_a_new_permit_with_route()
+	public function can_create_a_new_permit_with_path()
 	{
+		$this->withoutExceptionHandling();
+		
 		$this->assertCount(0, Permit::all());
 		
-		$path = '/products';
-		$method = 'get';
-		
-		$permit = Permit::create('Products', $path, $method);
+		$permit1 = Permit::create([
+			'name' => 'create products',
+			'slug' => 'create-products',
+			'path' => '/products',
+			'method' => 'get'
+		]);
 		
 		$this->assertCount(1, Permit::all());
-		$this->assertEquals('/products', $permit->path);
-		$this->assertEquals('GET', $permit->method);
+		$this->assertEquals('products', $permit1->path[0]);
+		$this->assertEquals('GET', $permit1->method[0]);
+		
+		$permit2 = Permit::create([
+			'name' => 'create orders',
+			'slug' => 'create-orders',
+			'path' => '/orders',
+		]);
+		
+		$this->assertCount(2, Permit::all());
+		$this->assertEquals('orders', $permit2->path[0]);
+		$this->assertEquals(null, $permit2->method);
 	}
 	
 	/** @test */
 	public function can_find_a_permit_by_name()
 	{
-		factory(Permit::class)->create([
-			'id' => 1,
+		createPermit([
 			'name' => 'Create Article',
-			'path' => '/create-article'
+			'slug' => 'create-article',
+			'path' => '/create-article',
 		]);
 		
 		$permit = Permit::findByName('Create Article');
-		$this->assertEquals('/create-article', $permit->path);
+		$this->assertEquals('create-article', $permit->path[0]);
 	}
 	
 	/** @test */
 	public function can_find_a_permit_by_id()
 	{
-		factory(Permit::class)->create([
-			'id' => 2,
-			'name' => 'Edit Article',
-			'path' => '/edit-article'
+		createPermit([
+			'id' => 1,
+			'name' => 'Create Article',
+			'slug' => 'create-article',
+			'path' => '/create-article',
 		]);
 		
-		$permit = Permit::findById(2);
-		$this->assertEquals('/edit-article', $permit->path);
-	}
-	
-	/** @test */
-	public function can_find_a_permit_by_route()
-	{
-		createPermit(['path' => '/articles', 'method' => 'get']);
-		$permit = Permit::findByPath('/articles');
-		
-		$this->assertEquals('GET', $permit->method);
-		$this->assertEquals('/articles', $permit->path);
+		$permit = Permit::findById(1);
+		$this->assertEquals('create-article', $permit->path[0]);
 	}
 	
 	/** @test */
 	public function can_give_permit_to_roles()
 	{
-		$permit = factory(Permit::class)->create([
+		$permit = createPermit();
+		
+		$role1 = createRole([
 			'id' => 1,
-			'name' => 'Create Article',
-			'path' => '/create-article'
+			'name' => 'editor',
+			'slug' => 'editor',
 		]);
 		
-		$r1 = factory(Role::class)->create([
+		$role2 = createRole([
 			'id' => 2,
-			'name' => 'editor'
-		]);
-		
-		$r2 = factory(Role::class)->create([
-			'id' => 3,
-			'name' => 'author'
+			'name' => 'author',
+			'slug' => 'author',
 		]);
 		
 		$this->assertCount(0, $permit->roles);
-		
 		$permit->giveToRoles('editor', 'author');
 		
 		$this->assertCount(2, $permit->refresh()->roles);
@@ -101,23 +105,26 @@ class PermitTest extends TestCase
 	/** @test */
 	public function can_remove_permit_from_roles()
 	{
-		$permit = factory(Permit::class)->create([
+		$permit = createPermit([
 			'id' => 1,
 			'name' => 'Create Article',
-			'path' => '/create-article'
+			'slug' => 'create-article',
+			'path' => '/create-article',
 		]);
 		
-		$r1 = factory(Role::class)->create([
+		$role1 = createRole([
+			'id' => 1,
+			'name' => 'author',
+			'slug' => 'author',
+		]);
+		
+		$role2 = createRole([
 			'id' => 2,
-			'name' => 'editor'
+			'name' => 'editor',
+			'slug' => 'editor',
 		]);
 		
-		$r2 = factory(Role::class)->create([
-			'id' => 3,
-			'name' => 'author'
-		]);
-		
-		$permit->giveToRoles($r1, $r2);
+		$permit->giveToRoles($role1, $role2);
 		$this->assertCount(2, $permit->refresh()->roles);
 		
 		$permit->removeFromRoles(2);
@@ -125,36 +132,25 @@ class PermitTest extends TestCase
 	}
 	
 	/** @test */
-	public function can_check_if_a_permit_under_roles()
+	public function can_check_if_a_permit_in_roles()
 	{
-		$role = factory(Role::class)->create([
-			'id' => 1
-		]);
+		$role = createRole();
+		$permit = createPermit();
 		
-		$permit = factory(Permit::class)->create([
-			'id' => 1,
-			'name' => 'Create Article',
-			'path' => '/create-article'
-		]);
-		
-		$this->assertFalse($permit->underRoles($role));
+		$this->assertFalse($permit->inRoles($role));
 		
 		$permit->giveToRoles($role);
 		
-		$this->assertTrue($permit->refresh()->underRoles($role));
+		$this->assertTrue($permit->refresh()->inRoles($role));
 	}
 	
 	/** @test */
 	public function can_give_permit_to_users()
 	{
-		$permit = factory(Permit::class)->create([
-			'id' => 1,
-			'name' => 'Create Article',
-			'path' => '/create-article'
-		]);
+		$permit = createPermit();
 		
-		$u1 = factory(User::class)->create(['id' => 1]);
-		$u2 = factory(User::class)->create(['id' => 2]);
+		$u1 = createUser(['id' => 1]);
+		$u2 = createUser(['id' => 2]);
 		
 		$this->assertCount(0, $permit->users);
 		
@@ -166,14 +162,10 @@ class PermitTest extends TestCase
 	/** @test */
 	public function can_remove_permit_from_users()
 	{
-		$permit = factory(Permit::class)->create([
-			'id' => 1,
-			'name' => 'Create Article',
-			'path' => '/create-article'
-		]);
+		$permit = createPermit();
 		
-		$u1 = factory(User::class)->create(['id' => 1]);
-		$u2 = factory(User::class)->create(['id' => 2]);
+		$u1 = createUser(['id' => 1]);
+		$u2 = createUser(['id' => 2]);
 		
 		$this->assertCount(0, $permit->users);
 		
@@ -188,30 +180,24 @@ class PermitTest extends TestCase
 	}
 	
 	/** @test */
-	public function can_check_if_a_permit_under_users()
+	public function can_check_if_a_permit_in_users()
 	{
-		$user = factory(User::class)->create([
-			'id' => 1
-		]);
+		$user = createUser();
 		
-		$permit = factory(Permit::class)->create([
-			'id' => 1,
-			'name' => 'Create Article',
-			'path' => '/create-article'
-		]);
+		$permit = createPermit();
 		
-		$this->assertFalse($permit->underUsers($user));
+		$this->assertFalse($permit->inUsers($user));
 		
 		$permit->giveToUsers($user);
 		
-		$this->assertTrue($permit->refresh()->underUsers($user));
+		$this->assertTrue($permit->refresh()->inUsers($user));
 	}
 	
 	/** @test */
 	public function user_has_permits()
 	{
-		$permit1 = createPermit(['id' => 1, 'name' => 'a']);
-		$permit2 = createPermit(['id' => 2, 'name' => 'b']);
+		$permit1 = createPermit(['name' => 'a', 'slug' => 'a-a']);
+		$permit2 = createPermit(['name' => 'b', 'slug' => 'b-b']);
 		
 		$user = createUser();
 		
@@ -232,7 +218,8 @@ class PermitTest extends TestCase
 		$permit = createPermit([
 			'id' => 1,
 			'name' => 'Create Article',
-			'path' => '/create-article'
+			'slug' => 'create-article',
+			'path' => '/create-article',
 		]);
 		
 		$user = createUser();
@@ -248,9 +235,9 @@ class PermitTest extends TestCase
 	public function user_can_remove_permits()
 	{
 		$permit = createPermit([
-			'id' => 1,
 			'name' => 'Create Article',
-			'path' => '/create-article'
+			'slug' => 'create-article',
+			'path' => '/create-article',
 		]);
 		
 		$user = createUser();
@@ -272,15 +259,15 @@ class PermitTest extends TestCase
 		$user = createUser();
 		
 		$permit = createPermit([
-			'id' => 1,
 			'name' => 'Create Article',
-			'path' => '/create-article'
+			'slug' => 'create-article',
+			'path' => '/create-article',
 		]);
 		
-		$this->assertFalse($user->hasDirectPermits($permit));
+		$this->assertFalse($user->hasPermits($permit));
 		
 		$user->givePermits($permit);
 		
-		$this->assertTrue($user->refresh()->hasDirectPermits($permit));
+		$this->assertTrue($user->refresh()->hasPermits($permit));
 	}
 }
