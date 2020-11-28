@@ -1,6 +1,6 @@
 {
     "name": "rainsens/rbac",
-    "description": "A Laravel RBAC authorization package based upon http path",
+    "description": "A Laravel RBAC authorization package",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -15,7 +15,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Rainsens\\Rbac\\": "src"
+            "Rainsens\\Rbac\\": "src",
+            "Adm\\": "vendor/orchestra/testbench-core/laravel/adm/"
         },
         "files": [
             "bootstrap/helpers.php"

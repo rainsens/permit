@@ -31,14 +31,14 @@ class RbacServiceProvider extends ServiceProvider
 		$this->app->bind(RoleContract::class, config('rbac.models.role'));
 		
 		$this->commands($this->rbacCommands);
-		$this->publishes([_base_path('config/rbac.php') => config_path('rbac.php')]);
+		$this->publishes([rbac_base_path('config/rbac.php') => config_path('rbac.php')]);
 		$this->permitMigrations();
 		$this->permitGate();
 	}
 	
 	protected function permitMigrations()
 	{
-		$this->loadMigrationsFrom(_base_path('database/migrations'));
+		$this->loadMigrationsFrom(rbac_base_path('database/migrations'));
 	}
 	
 	protected function permitGate()

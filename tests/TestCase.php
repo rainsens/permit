@@ -10,7 +10,7 @@ class TestCase extends \Orchestra\Testbench\TestCase
 	public function setUp(): void
 	{
 		parent::setUp();
-		$this->withFactories(_base_path('database/factories'));
+		$this->withFactories(rbac_base_path('database/factories'));
 	}
 	
 	protected function getPackageProviders($app)
@@ -29,11 +29,11 @@ class TestCase extends \Orchestra\Testbench\TestCase
 	
 	protected function getEnvironmentSetUp($app)
 	{
-		$rbacConfig = require _base_path('config/rbac.php');
+		$rbacConfig = require rbac_base_path('config/rbac.php');
 		config(['rbac' => $rbacConfig]);
 		config(['auth.providers.users.model' => User::class]);
 		
-		include_once _base_path('tests/Dummy/Database/Migrations/create_users_table.php');
+		include_once rbac_base_path('tests/Dummy/Database/Migrations/create_users_table.php');
 		(new \CreateUsersTable())->up();
 	}
 }
