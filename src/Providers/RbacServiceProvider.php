@@ -1,18 +1,20 @@
 <?php
 namespace Rainsens\Rbac\Providers;
 
-use Rainsens\Rbac\Contracts\PermitContract;
-use Rainsens\Rbac\Contracts\RoleContract;
 use Rainsens\Rbac\Rbac;
 use Illuminate\Support\Facades\Gate;
-use Rainsens\Rbac\Console\ShowCommand;
 use Illuminate\Support\ServiceProvider;
+use Rainsens\Rbac\Console\ConfigCommand;
+use Rainsens\Rbac\Console\InstallCommand;
+use Rainsens\Rbac\Contracts\RoleContract;
+use Rainsens\Rbac\Contracts\PermitContract;
 use Illuminate\Contracts\Auth\Access\Authorizable;
 
 class RbacServiceProvider extends ServiceProvider
 {
 	protected $rbacCommands = [
-		ShowCommand::class,
+		ConfigCommand::class,
+		InstallCommand::class,
 	];
 	
 	public function register()
