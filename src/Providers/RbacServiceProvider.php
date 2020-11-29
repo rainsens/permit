@@ -26,7 +26,6 @@ class RbacServiceProvider extends ServiceProvider
 	
 	public function boot()
 	{
-		if (! config('rbac.models')) return;
 		$this->app->bind(PermitContract::class, config('rbac.models.permit'));
 		$this->app->bind(RoleContract::class, config('rbac.models.role'));
 		
