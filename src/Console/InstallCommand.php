@@ -2,6 +2,7 @@
 namespace Rainsens\Rbac\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
 
 class InstallCommand extends Command
 {
@@ -18,7 +19,7 @@ class InstallCommand extends Command
 	protected function check()
 	{
 		// Check wether config file published.
-		if (!config('rbac.guard')) {
+		if (! File::exists(config_path('rbac.php'))) {
 			$errorNote = "Please run: 'php artisan rbac:config' first.\n";
 			$this->error($errorNote);
 			exit('Publish the config file and try it again.');

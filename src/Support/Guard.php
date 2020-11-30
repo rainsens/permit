@@ -2,6 +2,7 @@
 namespace Rainsens\Rbac\Support;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Rainsens\Rbac\Contracts\PermitContract;
 use Rainsens\Rbac\Contracts\RoleContract;
 use Rainsens\Rbac\Exceptions\GuardDoesNotExist;
@@ -31,7 +32,7 @@ class Guard
 	
 	public function __construct()
 	{
-		$guardName = config('rbac.guard') ?? $this->defaultName();
+		$guardName = Auth::getDefaultDriver();
 		$guardProviderName = config("auth.guards.{$guardName}.provider");
 		$guardProviderClass = config("auth.providers.{$guardProviderName}.model");
 		
@@ -39,24 +40,9 @@ class Guard
 			throw new GuardDoesNotExist('Guard name provided is not existing.');
 		}
 		
-		try {
-			app($guardProviderClass);
-		} catch (\Exception $e) {
-			throw new GuardProviderDoesNotExist('Guard provider is not existing.');
-		}
-		
 		$this->name = $guardName;
 		$this->providerName = $guardProviderName;
 		$this->providerClass = $guardProviderClass;
-	}
-	
-	/**
-	 * Default guard name.
-	 * @return string
-	 */
-	public function defaultName(): string
-	{
-		return config('auth.defaults.guard');
 	}
 	
 	/**

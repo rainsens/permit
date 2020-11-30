@@ -21,7 +21,7 @@ class PermitsMiddlewareTest extends TestCase
 		
 		$request = new Request();
 		
-		(new Permits())->handle($request, function ($request) {});
+		(new Permits())->handle($request, function ($request) {}, 'web');
 		
 	}
 	
@@ -35,7 +35,7 @@ class PermitsMiddlewareTest extends TestCase
 		$request = new Request();
 		(new Permits())->handle($request, function ($request) {
 			$this->assertEquals('Rainsen', Auth::user()->name);
-		});
+		}, 'web');
 	}
 	
 	/** @test */
@@ -57,7 +57,7 @@ class PermitsMiddlewareTest extends TestCase
 			'method' => 'GET'
 		]);
 		
-		Route::middleware('permits')->get('create', function () {});
+		Route::middleware('permits:web')->get('create', function () {});
 		
 		$this->get('create');
 	}
@@ -84,6 +84,6 @@ class PermitsMiddlewareTest extends TestCase
 		
 		(new Permits())->handle($request, function () {
 			$this->assertEquals('Rainsen', Auth::user()->name);
-		});
+		}, 'web');
 	}
 }

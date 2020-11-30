@@ -2,16 +2,6 @@
 
 return [
 	
-	/**
-	 * Default auth guard name for this package.
-	 * If you use package with only one guard
-	 * you could put it here.
-	 * But once you use more than one auth guard in your application
-	 * you could change it at runtime.
-	 * config(['rbac.guard' => 'guard_name'])
-	 */
-	'guard' => 'web',
-	
 	'models' => [
 		
 		'permit' => Rainsens\Rbac\Models\Permit::class,
