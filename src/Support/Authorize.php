@@ -72,8 +72,8 @@ class Authorize
 		
 		$this->roleMorphId = $this->getColumn('role_morph_id', 'role_id');
 		$this->roleMorphName = $this->getColumn('role_morph_name', 'role_name');
-		$this->roleMorphKey = $this->getColumn('role_morph_key', 'role_key');
-		$this->roleMorphType = $this->getColumn('role_morph_type', 'role_type');
+		$this->roleMorphKey = $this->getColumn('role_morph_key', 'rolable_id');
+		$this->roleMorphType = $this->getColumn('role_morph_type', 'rolable_type');
 		
 		$this->permitClass = $this->permitClass();
 		$this->roleClass = $this->roleClass();
