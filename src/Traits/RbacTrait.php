@@ -97,7 +97,7 @@ trait RbacTrait
 	/**
 	 * Find by 'id' and 'slug'
 	 */
-	public function hasRoles(...$roles)
+	public function hasRoles(...$roles): bool
 	{
 		$expectedRoles = Rbac::supplier()->findExpectedModels(Rbac::authorize()->roleInstance, $roles);
 		$expectedButValidRoles = Rbac::guard()->examine($expectedRoles);
@@ -109,7 +109,7 @@ trait RbacTrait
 	/**
 	 * Find by 'id' and 'slug'
 	 */
-	public function hasPermits(...$permits)
+	public function hasPermits(...$permits): bool
 	{
 		dd($permits);
 		$expectedPermits = Rbac::supplier()->findExpectedModels(Rbac::authorize()->permitInstance, $permits);
@@ -119,7 +119,7 @@ trait RbacTrait
 		return count(array_intersect($valid, $actual)) === count($valid);
 	}
 	
-	public function hasPathPermit()
+	public function hasPathPermit(): bool
 	{
 		$args = Rbac::supplier()->pathArgs();
 		
@@ -162,6 +162,6 @@ trait RbacTrait
 	
 	public function isSuper(): bool
 	{
-		return $this->hasRoles('adm');
+		return $this->hasRoles('super');
 	}
 }

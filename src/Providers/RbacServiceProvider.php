@@ -1,16 +1,14 @@
 <?php
 namespace Rainsens\Rbac\Providers;
 
-use Illuminate\Contracts\Http\Kernel;
-use Rainsens\Rbac\Middleware\Permits;
 use Rainsens\Rbac\Rbac;
+use Rainsens\Rbac\Middleware\Permits;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Rainsens\Rbac\Console\ConfigCommand;
 use Rainsens\Rbac\Console\InstallCommand;
 use Rainsens\Rbac\Contracts\RoleContract;
 use Rainsens\Rbac\Contracts\PermitContract;
-use Illuminate\Contracts\Auth\Access\Authorizable;
 
 class RbacServiceProvider extends ServiceProvider
 {
@@ -46,8 +44,15 @@ class RbacServiceProvider extends ServiceProvider
 	
 	protected function permitGate()
 	{
-		Gate::before(function (Authorizable $user, string $ability) {
-			return $user->hasPermits($ability);
-		});
+		$permits = \Rainsens\Rbac\Facades\Rbac::permit()->all();
+		
+		foreach ($permits as $permit) {
+			Gate::define($permit->slug, function ($user) use ($permit) {
+				if ($user->isSuper()) {
+					return true;
+				}
+				return $user->hasPermits($permit->slug);
+			});
+		}
 	}
 }
