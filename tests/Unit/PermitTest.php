@@ -38,7 +38,7 @@ class PermitTest extends TestCase
 		]);
 		
 		$this->assertCount(1, Permit::all());
-		$this->assertEquals('products', $permit1->path[0]);
+		$this->assertEquals('/products', $permit1->path[0]);
 		$this->assertEquals('GET', $permit1->method[0]);
 		
 		$permit2 = Permit::create([
@@ -48,7 +48,7 @@ class PermitTest extends TestCase
 		]);
 		
 		$this->assertCount(2, Permit::all());
-		$this->assertEquals('orders', $permit2->path[0]);
+		$this->assertEquals('/orders', $permit2->path[0]);
 		$this->assertEquals(null, $permit2->method);
 	}
 	
@@ -62,7 +62,7 @@ class PermitTest extends TestCase
 		]);
 		
 		$permit = Permit::findByName('Create Article');
-		$this->assertEquals('create-article', $permit->path[0]);
+		$this->assertEquals('/create-article', $permit->path[0]);
 	}
 	
 	/** @test */
@@ -76,7 +76,7 @@ class PermitTest extends TestCase
 		]);
 		
 		$permit = Permit::findById(1);
-		$this->assertEquals('create-article', $permit->path[0]);
+		$this->assertEquals('/create-article', $permit->path[0]);
 	}
 	
 	/** @test */

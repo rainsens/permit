@@ -1,6 +1,8 @@
 <?php
 namespace Rainsens\Rbac\Providers;
 
+use Illuminate\Contracts\Http\Kernel;
+use Rainsens\Rbac\Middleware\Permits;
 use Rainsens\Rbac\Rbac;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -29,6 +31,8 @@ class RbacServiceProvider extends ServiceProvider
 		$this->app->bind(PermitContract::class, config('rbac.models.permit'));
 		$this->app->bind(RoleContract::class, config('rbac.models.role'));
 		
+		app('router')->aliasMiddleware('permits', Permits::class);
+		
 		$this->commands($this->rbacCommands);
 		$this->publishes([rbac_base_path('config/rbac.php') => config_path('rbac.php')]);
 		$this->permitMigrations();
@@ -43,7 +47,7 @@ class RbacServiceProvider extends ServiceProvider
 	protected function permitGate()
 	{
 		Gate::before(function (Authorizable $user, string $ability) {
-			return $user->hasPathPermit() and $user->hasPermits($ability);
+			return $user->hasPermits($ability);
 		});
 	}
 }

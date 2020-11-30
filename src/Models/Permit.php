@@ -43,7 +43,8 @@ class Permit extends Model implements PermitContract
 		$this->attributes['path'] = collect($value)
 			->flatten()
 			->map(function ($path) {
-				return trim(str_replace('\/', '/', $path), '/') ?? '/';
+				$path = trim(str_replace('\/', '/', $path), '/');
+				return $path ? '/' . $path : '/';
 			})->toJson();
 	}
 	

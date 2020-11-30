@@ -154,6 +154,7 @@ trait RbacTrait
 				});
 			}
 		}
+		
 		return $methodAndPath || $path;
 	}
 }

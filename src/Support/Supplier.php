@@ -13,8 +13,8 @@ class Supplier
 	public function pathArgs(): Collection
 	{
 		return collect([
-			'path' => request('path') ? '/' . request('path') : '/',
-			'method' => request('method') ?? null,
+			'path' => request()->path() ? '/' . request()->path() : '/',
+			'method' => request()->method() ?? null,
 		]);
 	}
 	
