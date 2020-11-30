@@ -48,7 +48,7 @@ trait RbacTrait
 	/**
 	 * Find by 'id' and 'slug'
 	 */
-	public function givePermits($permits)
+	public function givePermits(...$permits)
 	{
 		$expectedPermits = Rbac::supplier()->findExpectedModels(Rbac::authorize()->permitInstance, $permits);
 		$expectedButValidPermits = Rbac::guard()->examine($expectedPermits);
@@ -60,7 +60,7 @@ trait RbacTrait
 	/**
 	 * Find by 'id' and 'slug'
 	 */
-	public function removePermits($permits)
+	public function removePermits(...$permits)
 	{
 		$expectedPermits = Rbac::supplier()->findExpectedModels(Rbac::authorize()->permitInstance, $permits);
 		$expectedButValidPermits = Rbac::guard()->examine($expectedPermits);
@@ -72,7 +72,7 @@ trait RbacTrait
 	/**
 	 * Find by 'id' and 'slug'
 	 */
-	public function giveRoles($roles)
+	public function giveRoles(...$roles)
 	{
 		$expectedRoles = Rbac::supplier()->findExpectedModels(Rbac::authorize()->roleInstance, $roles);
 		$expectedButValidRoles = Rbac::guard()->examine($expectedRoles);
@@ -84,7 +84,7 @@ trait RbacTrait
 	/**
 	 * Find by 'id' and 'slug'
 	 */
-	public function removeRoles($roles)
+	public function removeRoles(...$roles)
 	{
 		$expectedRoles = Rbac::supplier()->findExpectedModels(Rbac::authorize()->roleInstance, $roles);
 		$expectedButValidRoles = Rbac::guard()->examine($expectedRoles);
@@ -96,7 +96,7 @@ trait RbacTrait
 	/**
 	 * Find by 'id' and 'slug'
 	 */
-	public function hasRoles($roles)
+	public function hasRoles(...$roles)
 	{
 		$expectedRoles = Rbac::supplier()->findExpectedModels(Rbac::authorize()->roleInstance, $roles);
 		$expectedButValidRoles = Rbac::guard()->examine($expectedRoles);
@@ -108,13 +108,14 @@ trait RbacTrait
 	/**
 	 * Find by 'id' and 'slug'
 	 */
-	public function hasPermits($permits)
+	public function hasPermits(...$permits)
 	{
 		$expectedPermits = Rbac::supplier()->findExpectedModels(Rbac::authorize()->permitInstance, $permits);
 		$expectedButValidPermits = Rbac::guard()->examine($expectedPermits);
 		$valid = $expectedButValidPermits->pluck('id')->toArray();
 		$actual = $this->allPermits()->pluck('id')->toArray();
-		return count(array_intersect($valid, $actual)) === count($valid);
+		//return count(array_intersect($valid, $actual)) === count($valid);
+		return 'abc';
 	}
 	
 	public function hasPathPermit()
