@@ -1,6 +1,7 @@
 <?php
 namespace Rainsens\Rbac\Traits;
 
+use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Support\Str;
 use Rainsens\Rbac\Facades\Rbac;
 use Illuminate\Support\Collection;
@@ -110,12 +111,12 @@ trait RbacTrait
 	 */
 	public function hasPermits(...$permits)
 	{
+		dd($permits);
 		$expectedPermits = Rbac::supplier()->findExpectedModels(Rbac::authorize()->permitInstance, $permits);
 		$expectedButValidPermits = Rbac::guard()->examine($expectedPermits);
 		$valid = $expectedButValidPermits->pluck('id')->toArray();
 		$actual = $this->allPermits()->pluck('id')->toArray();
-		//return count(array_intersect($valid, $actual)) === count($valid);
-		return 'abc';
+		return count(array_intersect($valid, $actual)) === count($valid);
 	}
 	
 	public function hasPathPermit()
@@ -157,5 +158,10 @@ trait RbacTrait
 		}
 		
 		return $methodAndPath || $path;
+	}
+	
+	public function isSuper(): bool
+	{
+		return $this->hasRoles('adm');
 	}
 }
