@@ -3,7 +3,6 @@ namespace Rainsens\Rbac\Providers;
 
 use Rainsens\Rbac\Rbac;
 use Rainsens\Rbac\Middleware\Permits;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Rainsens\Rbac\Console\ConfigCommand;
 use Rainsens\Rbac\Console\InstallCommand;
@@ -34,25 +33,10 @@ class RbacServiceProvider extends ServiceProvider
 		$this->commands($this->rbacCommands);
 		$this->publishes([rbac_base_path('config/rbac.php') => config_path('rbac.php')]);
 		$this->permitMigrations();
-		$this->permitGate();
 	}
 	
 	protected function permitMigrations()
 	{
 		$this->loadMigrationsFrom(rbac_base_path('database/migrations'));
-	}
-	
-	protected function permitGate()
-	{
-		$permits = \Rainsens\Rbac\Facades\Rbac::permit()->all();
-		
-		foreach ($permits as $permit) {
-			Gate::define($permit->slug, function ($user) use ($permit) {
-				if ($user->isSuper()) {
-					return true;
-				}
-				return $user->hasPermits($permit->slug);
-			});
-		}
 	}
 }

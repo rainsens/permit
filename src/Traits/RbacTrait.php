@@ -1,7 +1,6 @@
 <?php
 namespace Rainsens\Rbac\Traits;
 
-use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Support\Str;
 use Rainsens\Rbac\Facades\Rbac;
 use Illuminate\Support\Collection;
@@ -158,6 +157,47 @@ trait RbacTrait
 		}
 		
 		return $methodAndPath || $path;
+	}
+	
+	/**
+	 * Determine if the entity has the given abilities.
+	 *
+	 * @param mixed ...$abilities
+	 * @return bool
+	 */
+	public function can(...$abilities): bool
+	{
+		if (empty($abilities)) {
+			return true;
+		}
+		
+		if ($this->isSuper()) {
+			return true;
+		}
+		
+		return $this->hasPermits($abilities);
+	}
+	
+	/**
+	 * Determine if the entity does not have the given abilities.
+	 *
+	 * @param mixed ...$abilities
+	 * @return bool
+	 */
+	public function cant(...$abilities): bool
+	{
+		return !$this->can($abilities);
+	}
+	
+	/**
+	 * Determine if the entity does not have the given abilities.
+	 *
+	 * @param mixed ...$abilities
+	 * @return bool
+	 */
+	public function cannot(...$abilities): bool
+	{
+		return $this->cant($abilities);
 	}
 	
 	public function isSuper(): bool
