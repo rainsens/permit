@@ -16,6 +16,14 @@ use Rainsens\Rbac\Models\Permit;
  */
 trait RbacTrait
 {
+	protected static function bootRbacTrait()
+	{
+		static::deleting(function ($model) {
+			$model->roles()->detach();
+			$model->permits()->detach();
+		});
+	}
+	
 	public function permits(): BelongsToMany
 	{
 		return $this->morphToMany(
